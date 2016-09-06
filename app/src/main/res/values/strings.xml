@@ -1,0 +1,50 @@
+<resources>
+    <string name="app_name">Popular Movies</string>
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_activity_detail">Movie Details</string>
+    <string name="user_rating">User rating</string>
+    <string name="movie_title">Movie Title</string>
+    <string name="release_date">Release date</string>
+    <string name="title_activity_settings">Settings</string>
+
+
+    <!-- Label for movies list order preference -->
+    <string name="pref_title_list_order">Movies List Order By</string>
+    <!-- Key name for storing order in SharedPreferences-->
+    <string name="pref_order_key" translatable="false">order</string>
+    <!-- Default value for order-->
+    <string name="pref_order_default" translatable="false">popular</string>
+    <!-- Summary for order by most popular -->
+    <string name="pref_order_popular_summary">Most Popular</string>
+    <!-- Summary for order by highest rated -->
+    <string name="pref_order_rating_summary">Highest Rated</string>
+    <!-- Summary for order by favorites -->
+    <string name="pref_order_favorites_summary">Favorites</string>
+
+    <string name="pref_order_rating_entry" translatable="false">top_rated</string>
+    <string name="pref_order_popular_entry" translatable="false">popular</string>
+    <string name="pref_order_favorites_entry" translatable="false">favorites</string>
+
+    <string-array name="pref_order_entries">
+        <item>@string/pref_order_popular_summary</item>
+        <item>@string/pref_order_rating_summary</item>
+        <item>@string/pref_order_favorites_summary</item>
+    </string-array>
+    <string-array name="pref_order_values">
+        <item>@string/pref_order_popular_entry</item>
+        <item>@string/pref_order_rating_entry</item>
+        <item>@string/pref_order_favorites_entry</item>
+    </string-array>
+
+    <string name="image_view_detail_description">Movie thumbnail.</string>
+    <string name="play_trailer">Watch </string>
+    <string name="trailers_text_view">Trailers</string>
+    <string name="favorite_on">"You've just favorited this movie.</string>
+    <string name="favorite_off">"You've removed this movie from your favorites.</string>
+    <!-- Error messages -->
+
+    <string name="error_internet">No internet connectivity.</string>
+
+
+
+</resources>
