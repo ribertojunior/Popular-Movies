@@ -6,6 +6,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -36,7 +37,7 @@ import br.com.kots.mob.complex.preferences.ComplexPreferences;
 import static com.casasw.popularmovies.Utilities.uriMaker;
 
 /**
- * A placeholder fragment containing a simple view.
+ * Fragment for DetailActivity
  */
 public class DetailActivityFragment extends Fragment {
 
@@ -139,10 +140,8 @@ public class DetailActivityFragment extends Fragment {
 
         });
 
-
-        //GridView gridView = (GridView) rootView.findViewById(R.id.gridViewTrailer);
         trailerLayout = (LinearLayout) rootView.findViewById(R.id.viewTrailer);
-        //itemView = inflater.inflate(R.layout.view_trailer_items, null);
+
         FetchTrailersTask task = new FetchTrailersTask(getContext(), inflater);
 
         task.execute(movie.getId()+"");
@@ -173,12 +172,8 @@ public class DetailActivityFragment extends Fragment {
                 return ret;
             }
 
-            HttpURLConnection urlConnection = null;
-            BufferedReader reader = null;
-
-            String trailersJSonStr = null;
             String movieId = strings[0];
-
+            String jSonStr = null;
             try {
 
                 String path[] = {"3","movie",movieId, "videos"};
@@ -186,48 +181,16 @@ public class DetailActivityFragment extends Fragment {
                         "api.themoviedb.org", path, "api_key",
                         BuildConfig.MovieDBApiKey).toString());
                 //Log.v(LOG_TAG, url.toString());
-                urlConnection = (HttpURLConnection) url.openConnection();
-                urlConnection.setRequestMethod("GET");
-                urlConnection.connect();
-                InputStream inputStream = urlConnection.getInputStream();
-                StringBuffer buffer = new StringBuffer();
-                if (inputStream == null) {
-                    trailersJSonStr = null;
-                }
-                reader = new BufferedReader(new InputStreamReader(inputStream));
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    // Since it's JSON, adding a newline isn't necessary (it won't affect parsing)
-                    // But it does make debugging a *lot* easier if you print out the completed
-                    // buffer for debugging.
-                    buffer.append(line + "\n");
-                }
+                jSonStr = fetchData(url);
 
-                if (buffer.length() == 0) {
-                    // Stream was empty.  No point in parsing.
-                    trailersJSonStr = null;
-                }
-                trailersJSonStr = buffer.toString();
 
             }catch (Exception e){
                 Log.e(LOG_TAG, e.toString());
-                trailersJSonStr = null;
-
-            }finally {
-                if (urlConnection != null){
-                    urlConnection.disconnect();
-                }
-                if (reader != null){
-                    try {
-                        reader.close();
-                    } catch (final IOException e) {
-                        Log.e(LOG_TAG, "Error closing stream", e);
-                    }
-                }
-
             }
             try {
-                return getTrailersDataFromJson(trailersJSonStr);
+
+                String [] params = {"results", "key", "name", "site"};
+                return getDataFromJson(jSonStr, params);
             }catch (JSONException e) {
                 Log.e(LOG_TAG, e.getMessage(),e);
                 e.printStackTrace();
@@ -241,7 +204,7 @@ public class DetailActivityFragment extends Fragment {
         protected void onPostExecute(final String[][] strings) {
             if (strings != null) {
                 if (!strings[0][0].equals("offline")) {
-                    //View trailerLayout = mInflater.inflate(R.layout.view_trailer_items, null);
+
                     View itemView;
                     ImageView imageView;
                     TextView textView;
@@ -257,8 +220,8 @@ public class DetailActivityFragment extends Fragment {
                             @Override
                             public void onClick(View view) {
                                 /**Snackbar.make(view, "Opening "+strings[pos][1]+": youtube.com/watch?v="+strings[pos][0],
-                                        Snackbar.LENGTH_SHORT)
-                                        .show();
+                                 Snackbar.LENGTH_SHORT)
+                                 .show();
                                  String authority, String[] path, String queryKey, String queryValue)*/
                                 String[] path = {"watch"};
                                 //URL url = new URL(Utilities.uriMaker("www.youtube.com", path, "v",strings[pos][0]+"").toString());
@@ -277,14 +240,32 @@ public class DetailActivityFragment extends Fragment {
             }
         }
 
-        private String[][] getTrailersDataFromJson(String trailersJSonStr) throws JSONException {
-            final String[] PARAMS = {"results", "key", "name", "site"};
-            JSONObject trailersJson = new JSONObject(trailersJSonStr);
-            JSONArray resultJsonArray = trailersJson.getJSONArray(PARAMS[0]);
+        /**
+         * This method works from a JSon structured this way:
+         * {
+         *      "params[0]":[
+         *          {
+         *              "params[1]": "data",
+         *              "params[2]": "data2",
+         *              ...
+         *              "params[n]: "datan"
+         *           }
+         * }
+         * the inner block can be repeated as many as needed.
+         *
+         * @param jSonStr String containing the JSon
+         * @param params params to search the JSon
+         * @return the JSon in a matrix data
+         * @throws JSONException
+         */
+        private String[][] getDataFromJson(String jSonStr, String[] params) throws JSONException {
+
+            JSONObject jsonObject = new JSONObject(jSonStr);
+            JSONArray resultJsonArray = jsonObject.getJSONArray(params[0]);
 
             //Log.v(LOG_TAG, "Result JSONArray: \n"+resultJsonArray.toString());
 
-            String[][] resultStr = new String[resultJsonArray.length()][PARAMS.length - 1];
+            String[][] resultStr = new String[resultJsonArray.length()][params.length - 1];
             JSONObject movieList;
             for (int i = 0; i< resultJsonArray.length(); i++) {
 
@@ -299,9 +280,9 @@ public class DetailActivityFragment extends Fragment {
 
                 //Log.v(LOG_TAG, "Movie ["+i+"]");
 
-                for (int j=0;j<PARAMS.length-1;j++) {
-                    resultStr[i][j]=movieList.getString(PARAMS[j+1]);
-                    //Log.v(LOG_TAG, PARAMS[j+1] +" - "+ resultStr[i][j] +" - "+ j);
+                for (int j=0;j<params.length-1;j++) {
+                    resultStr[i][j]=movieList.getString(params[j+1]);
+                    //Log.v(LOG_TAG, params[j+1] +" - "+ resultStr[i][j] +" - "+ j);
                 }
             }
             /*for (String[] row : resultStr
@@ -314,6 +295,60 @@ public class DetailActivityFragment extends Fragment {
             }
             Log.v(LOG_TAG, "Total :"+resultStr.toString());*/
             return resultStr;
+        }
+
+        @Nullable
+        private String fetchData (URL url) {
+            HttpURLConnection urlConnection = null;
+            BufferedReader reader = null;
+
+            String jSonStr = null;
+
+            try {
+                //Log.v(LOG_TAG, url.toString());
+                urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setRequestMethod("GET");
+                urlConnection.connect();
+                InputStream inputStream = urlConnection.getInputStream();
+                StringBuffer buffer = new StringBuffer();
+                if (inputStream == null) {
+                    jSonStr = null;
+                }
+                reader = new BufferedReader(new InputStreamReader(inputStream));
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    // Since it's JSON, adding a newline isn't necessary (it won't affect parsing)
+                    // But it does make debugging a *lot* easier if you print out the completed
+                    // buffer for debugging.
+                    buffer.append(line + "\n");
+                }
+
+                if (buffer.length() == 0) {
+                    // Stream was empty.  No point in parsing.
+                    jSonStr = null;
+                }
+                jSonStr = buffer.toString();
+                return jSonStr;
+
+            }catch (Exception e){
+                Log.e(LOG_TAG, e.toString());
+                jSonStr = null;
+
+            }finally {
+                if (urlConnection != null){
+                    urlConnection.disconnect();
+                }
+                if (reader != null){
+                    try {
+                        reader.close();
+                    } catch (final IOException e) {
+                        Log.e(LOG_TAG, "Error closing stream", e);
+                    }
+                }
+
+            }
+            return null;
+
         }
 
         private boolean isOnline() {
