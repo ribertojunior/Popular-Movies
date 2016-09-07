@@ -29,6 +29,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -150,7 +151,7 @@ public class DetailActivityFragment extends Fragment {
         return rootView;
     }
 
-    public class FetchTrailersTask extends AsyncTask<String, Void, String[][]> {
+    public class FetchTrailersTask extends AsyncTask<String, Void, ArrayList<String[][]>> {
 
         private final String LOG_TAG = FetchTrailersTask.class.getSimpleName();
         private Context mContext;
@@ -162,16 +163,18 @@ public class DetailActivityFragment extends Fragment {
         }
 
         @Override
-        protected String[][] doInBackground(String... strings) {
+        protected ArrayList<String[][]> doInBackground(String... strings) {
             if (strings.length == 0) {
                 return null;
             }
-
+            ArrayList<String[][]> result = new ArrayList<String[][]>();
             if (!isOnline()){
                 String[][] ret = {{"offline"}};
-                return ret;
+                result.add(ret);
+                return result;
             }
-
+            String[][] retTrailers = null;
+            String[][] retReviews = null;
             String movieId = strings[0];
             String jSonStr = null;
             try {
@@ -182,32 +185,35 @@ public class DetailActivityFragment extends Fragment {
                         BuildConfig.MovieDBApiKey).toString());
                 //Log.v(LOG_TAG, url.toString());
                 jSonStr = fetchData(url);
+                String [] params = {"results", "key", "name", "site"};
+                retTrailers = getDataFromJson(jSonStr, params);
+                result.add(retTrailers);
 
+                path[3] = "reviews";
+                url = new URL(uriMaker(
+                        "api.themoviedb.org", path, "api_key",
+                        BuildConfig.MovieDBApiKey).toString());
+                params[1] = "id"; params[2] = "author"; params[3] = "url";
+                jSonStr = fetchData(url);
+                retReviews = getDataFromJson(jSonStr, params);
+                result.add(retReviews);
 
             }catch (Exception e){
                 Log.e(LOG_TAG, e.toString());
             }
-            try {
+            return result;
 
-                String [] params = {"results", "key", "name", "site"};
-                return getDataFromJson(jSonStr, params);
-            }catch (JSONException e) {
-                Log.e(LOG_TAG, e.getMessage(),e);
-                e.printStackTrace();
-            }
-
-
-            return null;
         }
 
         @Override
-        protected void onPostExecute(final String[][] strings) {
-            if (strings != null) {
-                if (!strings[0][0].equals("offline")) {
+        protected void onPostExecute(final ArrayList<String[][]> list) {
+            if (list != null) {
+                if (!list.get(0)[0][0].equals("offline")) {
 
                     View itemView;
                     ImageView imageView;
                     TextView textView;
+                    final String[][] strings = list.get(0);
                     for (int i=0;i< strings.length;i++) {
                         //Log.v(LOG_TAG, "|----------Trailer:["+i+"]----------|");
                         itemView = mInflater.inflate(R.layout.view_trailer_items, null);
