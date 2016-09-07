@@ -134,7 +134,7 @@ public class MainActivityFragment extends Fragment {
 
             String moviesJsonStr = null;
             String movieList = strings[0];
-            Log.v(LOG_TAG, "Order by: " + movieList);
+            //Log.v(LOG_TAG, "Order by: " + movieList);
 
             if (movieList.equals("favorites")){
                 final String MPREF = "mPref";

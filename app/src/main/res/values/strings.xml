@@ -39,12 +39,14 @@
     <string name="image_view_detail_description">Movie thumbnail.</string>
     <string name="play_trailer">Watch </string>
     <string name="trailers_text_view">Trailers</string>
-    <string name="favorite_on">"You've just favorited this movie.</string>
-    <string name="favorite_off">"You've removed this movie from your favorites.</string>
+    <string name="favorite_on">You\'ve added this movie to yours favorites.</string>
+    <string name="favorite_off">You\'ve removed this movie from your favorites.</string>
+    <string name="read_pre">Read</string>
+    <string name="read_pos">\'s review.</string>
+
     <!-- Error messages -->
-
     <string name="error_internet">No internet connectivity.</string>
-
+    <string name="reviews_text_view">Reviews</string>
 
 
 </resources>

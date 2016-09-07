@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -44,6 +45,7 @@ public class DetailActivityFragment extends Fragment {
 
     private static final String LOG_TAG = DetailActivityFragment.class.getSimpleName();
     private LinearLayout trailerLayout;
+    private LinearLayout reviewLayout;
 
 
     public DetailActivityFragment() {
@@ -142,6 +144,7 @@ public class DetailActivityFragment extends Fragment {
         });
 
         trailerLayout = (LinearLayout) rootView.findViewById(R.id.viewTrailer);
+        reviewLayout = (LinearLayout) rootView.findViewById(R.id.viewReview);
 
         FetchTrailersTask task = new FetchTrailersTask(getContext(), inflater);
 
@@ -214,9 +217,12 @@ public class DetailActivityFragment extends Fragment {
                     ImageView imageView;
                     TextView textView;
                     final String[][] strings = list.get(0);
+                    /**
+                     * Trailers
+                     * */
                     for (int i=0;i< strings.length;i++) {
                         //Log.v(LOG_TAG, "|----------Trailer:["+i+"]----------|");
-                        itemView = mInflater.inflate(R.layout.view_trailer_items, null);
+                        itemView = mInflater.inflate(R.layout.view_items, null);
                         imageView = (ImageView) itemView.findViewById(R.id.imageViewPlay);
                         textView = (TextView) itemView.findViewById(R.id.textViewTrailer);
                         textView.setText(textView.getText()+" "+strings[i][1]);
@@ -240,7 +246,37 @@ public class DetailActivityFragment extends Fragment {
                         trailerLayout.addView(itemView);
 
                     }
+                    /**
+                     * Reviews
+                     * */
+                    final String[][] stringsReview = list.get(1);
+                    for (int i=0;i< stringsReview.length;i++) {
+                        //Log.v(LOG_TAG, "|----------Trailer:["+i+"]----------|");
+                        itemView = mInflater.inflate(R.layout.view_items, null);
+                        imageView = (ImageView) itemView.findViewById(R.id.imageViewPlay);
+                        imageView.setImageResource(R.drawable.text);
+                        textView = (TextView) itemView.findViewById(R.id.textViewTrailer);
+                        textView.setText(getString(R.string.read_pre)+" "+stringsReview[i][1]+getString(R.string.read_pos));
+                        //Log.v(LOG_TAG, stringsReview[i][j]);
+                        final int pos = i;
+                        imageView.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                /**Snackbar.make(view, "Opening "+stringsReview[pos][1]+": youtube.com/watch?v="+stringsReview[pos][0],
+                                 Snackbar.LENGTH_SHORT)
+                                 .show();
+                                 String authority, String[] path, String queryKey, String queryValue)*/
+                                String[] path = {"watch"};
+                                //URL url = new URL(Utilities.uriMaker("www.youtube.com", path, "v",stringsReview[pos][0]+"").toString());
+                                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(stringsReview[pos][2]+""));
+                                startActivity(intent);
+                                //Log.v(LOG_TAG, url.toString());
+                            }
+                        });
 
+                        reviewLayout.addView(itemView);
+
+                    }
 
                 }
             }
