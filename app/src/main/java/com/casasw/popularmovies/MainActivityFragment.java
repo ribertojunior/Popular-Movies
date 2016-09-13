@@ -326,19 +326,6 @@ public class MainActivityFragment extends Fragment {
                     imageAdapter = new ImageAdapter(getContext(), uriList);
                     gridView.setAdapter(imageAdapter);
 
-                    DetailActivityFragment detail = (DetailActivityFragment) getActivity().getSupportFragmentManager()
-                            .findFragmentById(R.id.detail_fragment);
-                    if (detail!=null) {
-                        Movie movie = new Movie(moviesList.get(0).getId(),moviesList.get(0).getTitle(),
-                                moviesList.get(0).getPoster(), moviesList.get(0).getThumbNail(),
-                                moviesList.get(0).getOverview(),moviesList.get(0).getVoteAvg(),
-                                moviesList.get(0).getReleaseDate());
-                        Bundle extras = new Bundle();
-                        extras.putParcelable("EXTRA_MOVIE", movie);
-                        detail.setArguments(extras);
-                        detail.updateContent();
-                    }
-
                 } else {
                     Snackbar.make(getActivity().findViewById(R.id.grid_view_posters), R.string.error_internet,
                             Snackbar.LENGTH_SHORT)
