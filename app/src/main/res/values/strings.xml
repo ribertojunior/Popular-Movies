@@ -47,6 +47,7 @@
     <!-- Error messages -->
     <string name="error_internet">No internet connectivity.</string>
     <string name="reviews_text_view">Reviews</string>
+    <string name="no_detail_text_view">Tap a movie to see its details!</string>
 
 
 </resources>

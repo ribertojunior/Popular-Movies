@@ -36,15 +36,14 @@ import br.com.kots.mob.complex.preferences.ComplexPreferences;
 
 import static com.casasw.popularmovies.Utilities.uriMaker;
 
-/**
- * A placeholder fragment containing a simple view.
- */
+
 public class MainActivityFragment extends Fragment {
     private final String LOG_TAG = MainActivityFragment.class.getSimpleName();
     ImageAdapter imageAdapter;
     GridView gridView;
     ArrayList<Movie> moviesList;
     SharedPreferences.OnSharedPreferenceChangeListener preferenceChangeListener;
+    Context context;
 
 
     public MainActivityFragment() {
@@ -53,28 +52,31 @@ public class MainActivityFragment extends Fragment {
     private void updateMovies() {
         FetchMoviesTask fetchMoviesTask = new FetchMoviesTask();
         SharedPreferences sharedPreferences =
-                PreferenceManager.getDefaultSharedPreferences(getActivity());
-        String orderBy = sharedPreferences.getString(getString(R.string.pref_order_key),
-                getString(R.string.pref_order_default));
+                PreferenceManager.getDefaultSharedPreferences(context);
+        String orderBy = sharedPreferences.getString(context.getString(R.string.pref_order_key),
+                context.getString(R.string.pref_order_default));
 
         //Log.v(LOG_TAG, "order by: "+ orderBy);
         fetchMoviesTask.execute(orderBy);
 
     }
 
+
+
     @Override
     public View onCreateView(final LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
         preferenceChangeListener =
                 new SharedPreferences.OnSharedPreferenceChangeListener() {
                     @Override
                     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
-                        if (s.equals(getString(R.string.pref_order_key))) {
-                            updateMovies();
-                        }
+
+                        updateMovies();
+
                     }
                 };
         sharedPreferences.registerOnSharedPreferenceChangeListener(preferenceChangeListener);
@@ -82,32 +84,36 @@ public class MainActivityFragment extends Fragment {
         imageAdapter = new ImageAdapter(getContext(), new ArrayList<Uri>());
         gridView.setAdapter(imageAdapter);
 
+
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-
-                Intent intent = new Intent(getActivity(),DetailActivity.class);
-                /**Bundle extras = new Bundle();
-                extras.putString("EXTRA_OVERVIEW", moviesList.get(i).getOverview());
-                extras.putString("EXTRA_TITLE",moviesList.get(i).getTitle());
-                extras.putString("EXTRA_THUMBNAIL",moviesList.get(i).getThumbNail());
-                extras.putString("EXTRA_RATING",moviesList.get(i).getVoteAvg());
-                extras.putString("EXTRA_RELEASE",moviesList.get(i).getReleaseDate());*/
                 Movie movie = new Movie(moviesList.get(i).getId(),moviesList.get(i).getTitle(),
                         moviesList.get(i).getPoster(), moviesList.get(i).getThumbNail(),
                         moviesList.get(i).getOverview(),moviesList.get(i).getVoteAvg(),
                         moviesList.get(i).getReleaseDate());
-                intent.putExtra("EXTRA_MOVIE", movie);
-                intent.putExtra("EXTRA_POSITION",i);
-                //intent.putExtras(extras);
-                startActivity(intent);
+                DetailActivityFragment detail = (DetailActivityFragment) getActivity().getSupportFragmentManager()
+                        .findFragmentById(R.id.detail_fragment);
+                if (detail == null) {
+                    Intent intent = new Intent(getActivity(),DetailActivity.class);
+                    intent.putExtra("EXTRA_MOVIE", movie);
+                    intent.putExtra("EXTRA_POSITION",i);
+                    startActivity(intent);
+                } else {
+                    Bundle extras = new Bundle();
+                    extras.putParcelable("EXTRA_MOVIE", movie);
+                    detail.setArguments(extras);
+                    detail.updateContent();
+                }
 
 
             }
         });
 
+
         //gridView.smoothScrollToPosition(index);
         updateMovies();
+
 
         return rootView;
     }
@@ -124,7 +130,7 @@ public class MainActivityFragment extends Fragment {
             if (strings.length == 0) {
                 return null;
             }
-            if (!isOnline()){
+            if (!isOnline(context)){
                 String[][] ret = {{"offline"}};
                 return ret;
             }
@@ -319,6 +325,20 @@ public class MainActivityFragment extends Fragment {
 
                     imageAdapter = new ImageAdapter(getContext(), uriList);
                     gridView.setAdapter(imageAdapter);
+
+                    DetailActivityFragment detail = (DetailActivityFragment) getActivity().getSupportFragmentManager()
+                            .findFragmentById(R.id.detail_fragment);
+                    if (detail!=null) {
+                        Movie movie = new Movie(moviesList.get(0).getId(),moviesList.get(0).getTitle(),
+                                moviesList.get(0).getPoster(), moviesList.get(0).getThumbNail(),
+                                moviesList.get(0).getOverview(),moviesList.get(0).getVoteAvg(),
+                                moviesList.get(0).getReleaseDate());
+                        Bundle extras = new Bundle();
+                        extras.putParcelable("EXTRA_MOVIE", movie);
+                        detail.setArguments(extras);
+                        detail.updateContent();
+                    }
+
                 } else {
                     Snackbar.make(getActivity().findViewById(R.id.grid_view_posters), R.string.error_internet,
                             Snackbar.LENGTH_SHORT)
@@ -329,9 +349,9 @@ public class MainActivityFragment extends Fragment {
             }
         }
 
-        private boolean isOnline() {
+        private boolean isOnline(Context context) {
             ConnectivityManager cm =
-                    (ConnectivityManager) getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+                    (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
             NetworkInfo netInfo = cm.getActiveNetworkInfo();
             return netInfo != null && netInfo.isConnectedOrConnecting();
         }
@@ -344,6 +364,9 @@ public class MainActivityFragment extends Fragment {
         //updateMovies();
     }
 
-
-
+    @Override
+    public void onAttach(Context context) {
+        this.context = context;
+        super.onAttach(context);
+    }
 }

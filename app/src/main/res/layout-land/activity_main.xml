@@ -5,7 +5,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    android:orientation="horizontal"
     tools:context="com.casasw.popularmovies.MainActivity">
 
     <android.support.design.widget.AppBarLayout
@@ -22,9 +21,26 @@
 
     </android.support.design.widget.AppBarLayout>
 
-    <include layout="@layout/content_main" />
-    <!--include layout="@layout/content_detail" /-->
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        android:id="@+id/container_land">
 
+        <fragment class="com.casasw.popularmovies.MainActivityFragment"
+            android:id="@+id/main_fragment"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="match_parent"
+            tools:layout="@layout/fragment_main" />
+        <fragment class="com.casasw.popularmovies.DetailActivityFragment"
+            android:layout_height="match_parent"
+            android:layout_width="0dp"
+            android:layout_weight="2"
+            android:id="@+id/detail_fragment"
+            tools:layout="@layout/fragment_detail" />
 
-
+    </LinearLayout>
 </android.support.design.widget.CoordinatorLayout>
