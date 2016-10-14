@@ -72,6 +72,8 @@ public class DetailActivityFragment extends Fragment {
         updateContent(); //must be here to avoid crash
     }
 
+
+
     public void updateContent() {
         final String MPREF = "mPref";
         final String FMOVIES = "fMovies";

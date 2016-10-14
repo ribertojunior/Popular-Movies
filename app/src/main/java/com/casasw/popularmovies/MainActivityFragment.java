@@ -39,11 +39,11 @@ import static com.casasw.popularmovies.Utilities.uriMaker;
 
 public class MainActivityFragment extends Fragment {
     private final String LOG_TAG = MainActivityFragment.class.getSimpleName();
-    ImageAdapter imageAdapter;
-    GridView gridView;
-    ArrayList<Movie> moviesList;
-    SharedPreferences.OnSharedPreferenceChangeListener preferenceChangeListener;
-    Context context;
+    ImageAdapter mImageAdapter;
+    GridView mGridView;
+    ArrayList<Movie> mMoviesList;
+    SharedPreferences.OnSharedPreferenceChangeListener mPreferenceChangeListener;
+    Context mContext;
 
 
     public MainActivityFragment() {
@@ -52,9 +52,9 @@ public class MainActivityFragment extends Fragment {
     private void updateMovies() {
         FetchMoviesTask fetchMoviesTask = new FetchMoviesTask();
         SharedPreferences sharedPreferences =
-                PreferenceManager.getDefaultSharedPreferences(context);
-        String orderBy = sharedPreferences.getString(context.getString(R.string.pref_order_key),
-                context.getString(R.string.pref_order_default));
+                PreferenceManager.getDefaultSharedPreferences(mContext);
+        String orderBy = sharedPreferences.getString(mContext.getString(R.string.pref_order_key),
+                mContext.getString(R.string.pref_order_default));
 
         //Log.v(LOG_TAG, "order by: "+ orderBy);
         fetchMoviesTask.execute(orderBy);
@@ -70,7 +70,7 @@ public class MainActivityFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-        preferenceChangeListener =
+        mPreferenceChangeListener =
                 new SharedPreferences.OnSharedPreferenceChangeListener() {
                     @Override
                     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
@@ -79,19 +79,19 @@ public class MainActivityFragment extends Fragment {
 
                     }
                 };
-        sharedPreferences.registerOnSharedPreferenceChangeListener(preferenceChangeListener);
-        gridView = (GridView) rootView.findViewById(R.id.grid_view_posters);
-        imageAdapter = new ImageAdapter(getContext(), new ArrayList<Uri>());
-        gridView.setAdapter(imageAdapter);
+        sharedPreferences.registerOnSharedPreferenceChangeListener(mPreferenceChangeListener);
+        mGridView = (GridView) rootView.findViewById(R.id.grid_view_posters);
+        mImageAdapter = new ImageAdapter(getContext(), new ArrayList<Uri>());
+        mGridView.setAdapter(mImageAdapter);
 
 
-        gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        mGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                Movie movie = new Movie(moviesList.get(i).getId(),moviesList.get(i).getTitle(),
-                        moviesList.get(i).getPoster(), moviesList.get(i).getThumbNail(),
-                        moviesList.get(i).getOverview(),moviesList.get(i).getVoteAvg(),
-                        moviesList.get(i).getReleaseDate());
+                Movie movie = new Movie(mMoviesList.get(i).getId(), mMoviesList.get(i).getTitle(),
+                        mMoviesList.get(i).getPoster(), mMoviesList.get(i).getThumbNail(),
+                        mMoviesList.get(i).getOverview(), mMoviesList.get(i).getVoteAvg(),
+                        mMoviesList.get(i).getReleaseDate());
                 DetailActivityFragment detail = (DetailActivityFragment) getActivity().getSupportFragmentManager()
                         .findFragmentById(R.id.detail_fragment);
                 if (detail == null) {
@@ -111,11 +111,15 @@ public class MainActivityFragment extends Fragment {
         });
 
 
-        //gridView.smoothScrollToPosition(index);
+
         updateMovies();
 
 
         return rootView;
+    }
+
+    public Movie getMovie(int position) {
+        return mMoviesList.get(position);
     }
 
     public class FetchMoviesTask extends AsyncTask<String, Void, String[][]> {
@@ -130,7 +134,7 @@ public class MainActivityFragment extends Fragment {
             if (strings.length == 0) {
                 return null;
             }
-            if (!isOnline(context)){
+            if (!isOnline(mContext)){
                 String[][] ret = {{"offline"}};
                 return ret;
             }
@@ -296,7 +300,7 @@ public class MainActivityFragment extends Fragment {
             //Log.v(LOG_TAG,"string[1][1]" + strings[0][0].substring(1));
             if (strings != null) {
                 if (!strings[0][0].equals("offline")) {
-                    moviesList = new ArrayList<Movie>();
+                    mMoviesList = new ArrayList<Movie>();
                     ArrayList<Uri> uriList = new ArrayList<Uri>();
                     //Uri.Builder builder = new Uri.Builder();
 
@@ -313,7 +317,7 @@ public class MainActivityFragment extends Fragment {
                     /* posterPath - overview - title - thumbnail - rating - date - id
                     ((Integer id, String title, String poster,  String thumbNail, String overview,
                       String voteAvg, String releaseDate))*/
-                        moviesList.add(new Movie(Integer.parseInt(strings[i][6]), strings[i][2], strings[i][0].substring(1),
+                        mMoviesList.add(new Movie(Integer.parseInt(strings[i][6]), strings[i][2], strings[i][0].substring(1),
                                 strings[i][3].substring(1), strings[i][1], strings[i][4], strings[i][5]));
                     /*Log.v(LOG_TAG, strings[i][0]+" - "+strings[i][1]+" - "+strings[i][2]+" - "+
                             strings[i][3]+" - "+strings[i][4]+" - "+strings[i][5]+" - "+strings[i][6]);*/
@@ -323,8 +327,8 @@ public class MainActivityFragment extends Fragment {
                     }
 
 
-                    imageAdapter = new ImageAdapter(getContext(), uriList);
-                    gridView.setAdapter(imageAdapter);
+                    mImageAdapter = new ImageAdapter(getContext(), uriList);
+                    mGridView.setAdapter(mImageAdapter);
 
                 } else {
                     Snackbar.make(getActivity().findViewById(R.id.grid_view_posters), R.string.error_internet,
@@ -353,7 +357,14 @@ public class MainActivityFragment extends Fragment {
 
     @Override
     public void onAttach(Context context) {
-        this.context = context;
+        this.mContext = context;
         super.onAttach(context);
+    }
+
+    public interface Callback {
+        /**
+         * DetailFragmentCallback for when an item has been selected.
+         */
+        public void onItemSelected(Movie movie);
     }
 }
