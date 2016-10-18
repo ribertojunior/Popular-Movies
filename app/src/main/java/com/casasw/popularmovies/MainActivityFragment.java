@@ -93,7 +93,7 @@ public class MainActivityFragment extends Fragment {
                         mMoviesList.get(i).getOverview(), mMoviesList.get(i).getVoteAvg(),
                         mMoviesList.get(i).getReleaseDate());
                 DetailActivityFragment detail = (DetailActivityFragment) getActivity().getSupportFragmentManager()
-                        .findFragmentById(R.id.detail_fragment);
+                        .findFragmentById(R.id.fragment_detail);
                 if (detail == null) {
                     Intent intent = new Intent(getActivity(),DetailActivity.class);
                     intent.putExtra("EXTRA_MOVIE", movie);
