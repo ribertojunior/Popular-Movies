@@ -12,24 +12,28 @@ import android.support.annotation.Nullable;
 
 
 public class MovieProvider extends ContentProvider {
-    private static final UriMatcher sUriMatcher = buildUriMatcher();
+
     private MovieDbHelper mOpenHelper;
 
     static final int MOVIE = 100;
-    static final int FAVORITES = 101;
+    static final int MOVIE_ID = 101;
+    static final int FAVORITES = 102;
+    static final int FAVORITES_ID = 103;
+    private static final UriMatcher sUriMatcher = buildUriMatcher();
 
     private static final SQLiteQueryBuilder sMovieListQueryBuilder;
     static {
         sMovieListQueryBuilder = new SQLiteQueryBuilder();
         sMovieListQueryBuilder.setTables(
-                MovieContract.MovieEntry.TABLE_NAME + "INNER JOIN " +
+                MovieContract.MovieEntry.TABLE_NAME + " INNER JOIN " +
                         MovieContract.FavoritesEntry.TABLE_NAME +
-                        "ON " + MovieContract.MovieEntry.TABLE_NAME +
+                        " ON " + MovieContract.MovieEntry.TABLE_NAME +
                         "." + MovieContract.MovieEntry._ID +
                         " = " + MovieContract.FavoritesEntry.TABLE_NAME +
                         "." + MovieContract.FavoritesEntry.COLUMN_MOVIE_KEY
         );
     }
+
     private static final SQLiteQueryBuilder sMovieQueryBuilder;
     static {
         sMovieQueryBuilder = new SQLiteQueryBuilder();
@@ -43,7 +47,7 @@ public class MovieProvider extends ContentProvider {
 
     private static final String sMovieListSelection =
             MovieContract.MovieEntry.TABLE_NAME+
-                    "." + MovieContract.MovieEntry.COLUMN_MOVIE_LIST + "= ?;";
+                    "." + MovieContract.MovieEntry.COLUMN_MOVIE_LIST + " = ?";
 
     private Cursor getFavoritesList(Uri uri, String[] projection, String sortOrder) {
 
@@ -61,15 +65,12 @@ public class MovieProvider extends ContentProvider {
 
     }
 
-    private Cursor getMovieByList(Uri uri, String[] projection, String sortOrder) {
-        String movieList = MovieContract.MovieEntry.getMovieListFromUri(uri);
-        String[] selectionArgs = new String[]{movieList};
-        String selection = sMovieListSelection;
+    private Cursor getFavoritesMovies(Uri uri, String[] projection,String[] args,  String sortOrder) {
 
         return sMovieListQueryBuilder.query(mOpenHelper.getReadableDatabase(),
                 projection,
-                selection,
-                selectionArgs,
+                sMovieListSelection,
+                args,
                 null,
                 null,
                 sortOrder
@@ -84,8 +85,9 @@ public class MovieProvider extends ContentProvider {
         // 2) Use the addURI function to match each of the types.  Use the constants from
         // WeatherContract to help define the types to the UriMatcher.
         uriMatcher.addURI(MovieContract.CONTENT_AUTHORITY, MovieContract.PATH_MOVIES, MOVIE);
-
+        uriMatcher.addURI(MovieContract.CONTENT_AUTHORITY, MovieContract.PATH_MOVIES+"/*", MOVIE_ID);
         uriMatcher.addURI(MovieContract.CONTENT_AUTHORITY, MovieContract.PATH_FAVORITES, FAVORITES);
+        uriMatcher.addURI(MovieContract.CONTENT_AUTHORITY, MovieContract.PATH_FAVORITES+"/*", FAVORITES_ID);
 
 
         // 3) Return the new matcher!
@@ -107,7 +109,11 @@ public class MovieProvider extends ContentProvider {
         switch (match){
             case MOVIE:
                 return MovieContract.MovieEntry.CONTENT_TYPE;
+            case MOVIE_ID:
+                return MovieContract.MovieEntry.CONTENT_TYPE;
             case FAVORITES:
+                return MovieContract.FavoritesEntry.CONTENT_TYPE;
+            case FAVORITES_ID:
                 return MovieContract.FavoritesEntry.CONTENT_TYPE;
             default:
                 throw new UnsupportedOperationException("Unknown uri: "+ uri);
@@ -120,12 +126,8 @@ public class MovieProvider extends ContentProvider {
         Cursor retCursor;
         switch (sUriMatcher.match(uri)) {
             case MOVIE: {
-                retCursor = getMovieByList(uri, projection, sortOrder);
-                break;
-            }
-            case FAVORITES: {
                 retCursor = mOpenHelper.getReadableDatabase().query(
-                        MovieContract.FavoritesEntry.TABLE_NAME,
+                        MovieContract.MovieEntry.TABLE_NAME,
                         projection,
                         selection,
                         selectionArgs,
@@ -133,6 +135,10 @@ public class MovieProvider extends ContentProvider {
                         null,
                         sortOrder
                 );
+                break;
+            }
+            case FAVORITES: {
+                retCursor = getFavoritesMovies(uri, projection, selectionArgs, sortOrder);
                 break;
             }
             default:
@@ -160,7 +166,10 @@ public class MovieProvider extends ContentProvider {
                     throw new android.database.SQLException("Failed to insert row into " + uri);
             }
             case FAVORITES: {
-                long _id = db.insert(MovieContract.FavoritesEntry.TABLE_NAME, null, contentValues);
+                ContentValues favoritesCV = new ContentValues();
+                favoritesCV.put(MovieContract.FavoritesEntry.COLUMN_MOVIE_KEY,(Long) contentValues.get(MovieContract.MovieEntry._ID));
+                favoritesCV.put(MovieContract.FavoritesEntry.COLUMN_ORIGINAL_TITLE,(String) contentValues.get(MovieContract.MovieEntry.COLUMN_ORIGINAL_TITLE));
+                long _id = db.insert(MovieContract.FavoritesEntry.TABLE_NAME, null, favoritesCV);
                 if (_id > 0)
                     returnUri = MovieContract.FavoritesEntry.buildFavoritesUri(_id);
                 else
@@ -171,7 +180,7 @@ public class MovieProvider extends ContentProvider {
                 throw new UnsupportedOperationException("Unknown uri: "+ uri);
         }
         getContext().getContentResolver().notifyChange(uri, null);
-        return null;
+        return returnUri;
     }
 
     @Override
@@ -242,6 +251,7 @@ public class MovieProvider extends ContentProvider {
                     db.endTransaction();
                 }
                 getContext().getContentResolver().notifyChange(uri, null);
+                return count;
             }
             default:
                 return super.bulkInsert(uri, values);
