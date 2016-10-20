@@ -48,6 +48,10 @@
     <string name="error_internet">No internet connectivity.</string>
     <string name="reviews_text_view">Reviews</string>
     <string name="no_detail_text_view">Tap a movie to see its details!</string>
+    <!-- Account type (for sync-adapter authenticator) -->
+    <!-- SyncAdapter related -->
+    <string name="sync_account_type">popularmovies.casasw.com</string>
+    <string name="content_authority">com.casasw.popularmovies</string>
 
 
 </resources>

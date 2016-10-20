@@ -10,7 +10,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 public class MovieDbHelper extends SQLiteOpenHelper {
     private static final String LOG_TAG = MovieDbHelper.class.getSimpleName();
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
 
     static final String DATABASE_NAME = "movie.db";
 
@@ -40,12 +40,34 @@ public class MovieDbHelper extends SQLiteOpenHelper {
 
         sqLiteDatabase.execSQL(SQL_CREATE_FAVORITES_TABLE);
 
+        final String SQL_CREATE_REVIEWS_TABLE = "CREATE TABLE " + MovieContract.ReviewsEntry.TABLE_NAME + " (" +
+                MovieContract.ReviewsEntry._ID+ " INTEGER PRIMARY KEY," +
+                MovieContract.ReviewsEntry.COLUMN_MOVIE_KEY + " TEXT NOT NULL, " +
+                MovieContract.ReviewsEntry.COLUMN_AUTHOR + " TEXT NOT NULL, " +
+                MovieContract.ReviewsEntry.COLUMN_URL + " TEXT NOT NULL, " +
+                "FOREIGN KEY (" + MovieContract.ReviewsEntry.COLUMN_MOVIE_KEY + ") REFERENCES "+
+                MovieContract.MovieEntry.TABLE_NAME + " (" + MovieContract.MovieEntry._ID + "));";
+
+        sqLiteDatabase.execSQL(SQL_CREATE_REVIEWS_TABLE);
+
+        final String SQL_CREATE_TRAILERS_TABLE = "CREATE TABLE " + MovieContract.TrailersEntry.TABLE_NAME + " (" +
+                MovieContract.TrailersEntry.COLUMN_MOVIE_KEY+ " TEXT NOT NULL," +
+                MovieContract.TrailersEntry.COLUMN_KEY + " TEXT NOT NULL, " +
+                MovieContract.TrailersEntry.COLUMN_NAME + " TEXT NOT NULL, " +
+                MovieContract.TrailersEntry.COLUMN_SITE + " TEXT NOT NULL, " +
+                "FOREIGN KEY (" + MovieContract.TrailersEntry.COLUMN_MOVIE_KEY + ") REFERENCES "+
+                MovieContract.MovieEntry.TABLE_NAME + " (" + MovieContract.MovieEntry._ID + "));";
+
+        sqLiteDatabase.execSQL(SQL_CREATE_TRAILERS_TABLE);
+
         }
 
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + MovieContract.MovieEntry.TABLE_NAME);
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + MovieContract.FavoritesEntry.TABLE_NAME);
+        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + MovieContract.ReviewsEntry.TABLE_NAME);
+        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + MovieContract.TrailersEntry.TABLE_NAME);
         onCreate(sqLiteDatabase);
     }
 }

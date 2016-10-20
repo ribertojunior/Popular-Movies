@@ -10,6 +10,9 @@ import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.support.annotation.Nullable;
 
+import static com.casasw.popularmovies.data.MovieContract.ReviewsEntry.COLUMN_AUTHOR;
+import static com.casasw.popularmovies.data.MovieContract.ReviewsEntry.COLUMN_URL;
+
 
 public class MovieProvider extends ContentProvider {
 
@@ -19,6 +22,11 @@ public class MovieProvider extends ContentProvider {
     static final int MOVIE_ID = 101;
     static final int FAVORITES = 102;
     static final int FAVORITES_ID = 103;
+    static final int REVIEWS = 104;
+    static final int REVIEWS_ID = 105;
+    static final int TRAILERS = 106;
+    static final int TRAILERS_ID = 107;
+
     private static final UriMatcher sUriMatcher = buildUriMatcher();
 
     private static final SQLiteQueryBuilder sMovieListQueryBuilder;
@@ -88,6 +96,10 @@ public class MovieProvider extends ContentProvider {
         uriMatcher.addURI(MovieContract.CONTENT_AUTHORITY, MovieContract.PATH_MOVIES+"/*", MOVIE_ID);
         uriMatcher.addURI(MovieContract.CONTENT_AUTHORITY, MovieContract.PATH_FAVORITES, FAVORITES);
         uriMatcher.addURI(MovieContract.CONTENT_AUTHORITY, MovieContract.PATH_FAVORITES+"/*", FAVORITES_ID);
+        uriMatcher.addURI(MovieContract.CONTENT_AUTHORITY, MovieContract.PATH_FAVORITES, FAVORITES);
+        uriMatcher.addURI(MovieContract.CONTENT_AUTHORITY, MovieContract.PATH_REVIEWS+"/*", REVIEWS_ID);
+        uriMatcher.addURI(MovieContract.CONTENT_AUTHORITY, MovieContract.PATH_TRAILERS, TRAILERS);
+        uriMatcher.addURI(MovieContract.CONTENT_AUTHORITY, MovieContract.PATH_TRAILERS+"/*", TRAILERS_ID);
 
 
         // 3) Return the new matcher!
@@ -115,6 +127,14 @@ public class MovieProvider extends ContentProvider {
                 return MovieContract.FavoritesEntry.CONTENT_TYPE;
             case FAVORITES_ID:
                 return MovieContract.FavoritesEntry.CONTENT_TYPE;
+            case REVIEWS:
+                return MovieContract.FavoritesEntry.CONTENT_TYPE;
+            case REVIEWS_ID:
+                return MovieContract.FavoritesEntry.CONTENT_TYPE;
+            case TRAILERS:
+                return MovieContract.FavoritesEntry.CONTENT_TYPE;
+            case TRAILERS_ID:
+                return MovieContract.FavoritesEntry.CONTENT_TYPE;
             default:
                 throw new UnsupportedOperationException("Unknown uri: "+ uri);
         }
@@ -141,6 +161,28 @@ public class MovieProvider extends ContentProvider {
                 retCursor = getFavoritesMovies(uri, projection, selectionArgs, sortOrder);
                 break;
             }
+            case REVIEWS: {
+                retCursor = mOpenHelper.getReadableDatabase().query(
+                        MovieContract.ReviewsEntry.TABLE_NAME,
+                        projection,
+                        selection,
+                        selectionArgs,
+                        null,
+                        null,
+                        sortOrder);
+                break;
+            }
+            case TRAILERS: {
+                retCursor = mOpenHelper.getReadableDatabase().query(
+                        MovieContract.TrailersEntry.TABLE_NAME,
+                        projection,
+                        selection,
+                        selectionArgs,
+                        null,
+                        null,
+                        sortOrder);
+                break;
+            }
             default:
                 throw new UnsupportedOperationException("Unknown uri: "+ uri);
 
@@ -164,6 +206,7 @@ public class MovieProvider extends ContentProvider {
                 }
                 else
                     throw new android.database.SQLException("Failed to insert row into " + uri);
+                break;
             }
             case FAVORITES: {
                 ContentValues favoritesCV = new ContentValues();
@@ -172,6 +215,35 @@ public class MovieProvider extends ContentProvider {
                 long _id = db.insert(MovieContract.FavoritesEntry.TABLE_NAME, null, favoritesCV);
                 if (_id > 0)
                     returnUri = MovieContract.FavoritesEntry.buildFavoritesUri(_id);
+                else
+                    throw new android.database.SQLException("Failed to insert row into " + uri);
+                break;
+            }
+            case REVIEWS: {
+                ContentValues reviewsCV = new ContentValues();
+                reviewsCV.put(MovieContract.ReviewsEntry._ID, (String) contentValues.get(MovieContract.ReviewsEntry._ID));
+                reviewsCV.put(MovieContract.ReviewsEntry.COLUMN_MOVIE_KEY, (String) contentValues.get(MovieContract.ReviewsEntry.COLUMN_MOVIE_KEY));
+                reviewsCV.put(COLUMN_AUTHOR, (String) contentValues.get(COLUMN_AUTHOR));
+                reviewsCV.put(COLUMN_URL, (String) contentValues.get(COLUMN_URL));
+                long _id = db.insert(MovieContract.ReviewsEntry.TABLE_NAME, null, reviewsCV);
+                if (_id > 0) {
+                    returnUri = MovieContract.ReviewsEntry.buildReviewsUri(_id);
+                }
+                else
+                    throw new android.database.SQLException("Failed to insert row into " + uri);
+                break;                
+            }
+            case TRAILERS: {
+                ContentValues trailersCV = new ContentValues();
+                trailersCV.put(MovieContract.TrailersEntry._ID, (String) contentValues.get(MovieContract.TrailersEntry._ID));
+                trailersCV.put(MovieContract.TrailersEntry.COLUMN_MOVIE_KEY, (String) contentValues.get(MovieContract.TrailersEntry.COLUMN_MOVIE_KEY));
+                trailersCV.put(MovieContract.TrailersEntry.COLUMN_KEY, (String) contentValues.get(MovieContract.TrailersEntry.COLUMN_KEY));
+                trailersCV.put(MovieContract.TrailersEntry.COLUMN_NAME, (String) contentValues.get(MovieContract.TrailersEntry.COLUMN_NAME));
+                trailersCV.put(MovieContract.TrailersEntry.COLUMN_SITE, (String) contentValues.get(MovieContract.TrailersEntry.COLUMN_SITE));
+                long _id = db.insert(MovieContract.TrailersEntry.TABLE_NAME, null, trailersCV);
+                if (_id > 0) {
+                    returnUri = MovieContract.TrailersEntry.buildTrailersUri(_id);
+                }
                 else
                     throw new android.database.SQLException("Failed to insert row into " + uri);
                 break;
@@ -199,6 +271,14 @@ public class MovieProvider extends ContentProvider {
                 del = db.delete(MovieContract.FavoritesEntry.TABLE_NAME, s, strings);
                 break;
             }
+            case REVIEWS: {
+                del = db.delete(MovieContract.ReviewsEntry.TABLE_NAME,s,strings);
+                break;
+            }
+            case TRAILERS: {
+                del = db.delete(MovieContract.TrailersEntry.TABLE_NAME,s,strings);
+                break;
+            }
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
@@ -221,6 +301,14 @@ public class MovieProvider extends ContentProvider {
             }
             case FAVORITES: {
                 ups = db.update(MovieContract.FavoritesEntry.TABLE_NAME, contentValues, s, strings);
+                break;
+            }
+            case REVIEWS: {
+                ups = db.update(MovieContract.ReviewsEntry.TABLE_NAME, contentValues, s, strings);
+                break;
+            }
+            case TRAILERS: {
+                ups = db.update(MovieContract.TrailersEntry.TABLE_NAME, contentValues, s, strings);
                 break;
             }
             default:

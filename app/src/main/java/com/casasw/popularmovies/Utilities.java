@@ -1,6 +1,9 @@
 package com.casasw.popularmovies;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.net.Uri;
+import android.preference.PreferenceManager;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -87,4 +90,19 @@ public class Utilities {
         return builder.build();
     }
 
+    public static String getMoviesList(Context context) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        return sharedPreferences.getString(context.getString(R.string.pref_order_key),
+                context.getString(R.string.pref_order_default));
+    }
+
+    /**
+     * Remove the year from a string containing a date with the format mm/dd/yyyy or dd/mm/yyyy
+     * @param date
+     * @return A string containing a year with the format yyyy
+     */
+    public static String removeYear(String date) {
+        return date.substring(5);
+
+    }
 }
