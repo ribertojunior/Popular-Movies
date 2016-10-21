@@ -24,15 +24,15 @@ import static com.casasw.popularmovies.Utilities.uriMaker;
 /**
  * Fragment for DetailActivity
  */
-public class DetailActivityFragment extends Fragment {
+public class DetailFragment extends Fragment {
 
-    private static final String LOG_TAG = DetailActivityFragment.class.getSimpleName();
+    private static final String LOG_TAG = DetailFragment.class.getSimpleName();
     private LinearLayout trailerLayout;
     private LinearLayout reviewLayout;
     private Movie movie;
 
 
-    public DetailActivityFragment() {
+    public DetailFragment() {
     }
 
 
@@ -182,6 +182,7 @@ public class DetailActivityFragment extends Fragment {
     }
 
 
+    public void onListChanged(String list) {
 
-
+    }
 }

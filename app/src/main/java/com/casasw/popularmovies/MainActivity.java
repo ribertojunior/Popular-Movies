@@ -8,9 +8,12 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
-public class MainActivity extends AppCompatActivity implements MainActivityFragment.Callback {
+import com.casasw.popularmovies.sync.PopularMoviesSyncAdapter;
+
+public class MainActivity extends AppCompatActivity implements MainFragment.Callback {
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
     public static final String DETAILFRAGMENT_TAG = "DFTAG";
+    private String mList;
     private boolean mTwoPane;
 
     @Override
@@ -19,16 +22,19 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        mList = Utilities.getMoviesList(this);
         if (findViewById(R.id.detail_container) != null) {
             mTwoPane = true;
             if (savedInstanceState == null) {
                 getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.detail_container, new DetailActivityFragment(), DETAILFRAGMENT_TAG)
+                        .replace(R.id.detail_container, new DetailFragment(), DETAILFRAGMENT_TAG)
                         .commit();
             }
         }else {
             mTwoPane = false;
         }
+
+        PopularMoviesSyncAdapter.initializeSyncAdapter(this);
 
 
     }
@@ -56,13 +62,30 @@ public class MainActivity extends AppCompatActivity implements MainActivityFragm
 
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        String list = Utilities.getMoviesList(this);
+        if (list != null && !list.equals(list)) {
+            MainFragment mf =  (MainFragment) getSupportFragmentManager().findFragmentById(R.id.main_fragment);
+            if (mf != null) {
+                mf.onListChanged();
+            }
+            DetailFragment df = (DetailFragment) getSupportFragmentManager().findFragmentByTag(DETAILFRAGMENT_TAG);
+            if (df != null){
+                df.onListChanged(list);
+            }
+            mList = list;
+        }
+    }
+
+    @Override
     public void onItemSelected(Movie movie) {
         if (mTwoPane) {
             Intent intent = new Intent(this,DetailActivity.class);
             intent.putExtra("EXTRA_MOVIE", movie);
             //startActivity(intent);
 
-            DetailActivityFragment detailFragment = new DetailActivityFragment();
+            DetailFragment detailFragment = new DetailFragment();
             detailFragment.setArguments(intent.getExtras());
             FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
             ft.replace(R.id.detail_container, detailFragment);

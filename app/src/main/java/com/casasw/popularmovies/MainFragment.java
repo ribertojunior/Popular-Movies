@@ -3,10 +3,13 @@ package com.casasw.popularmovies;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,16 +19,17 @@ import android.widget.GridView;
 import java.util.ArrayList;
 
 
-public class MainActivityFragment extends Fragment {
-    private final String LOG_TAG = MainActivityFragment.class.getSimpleName();
+public class MainFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
+    private final String LOG_TAG = MainFragment.class.getSimpleName();
     ImageAdapter mImageAdapter;
+    private static final int LOADER_ID = 14;
     GridView mGridView;
     ArrayList<Movie> mMoviesList;
     SharedPreferences.OnSharedPreferenceChangeListener mPreferenceChangeListener;
     Context mContext;
 
 
-    public MainActivityFragment() {
+    public MainFragment() {
     }
 
     private void updateMovies() {
@@ -71,7 +75,7 @@ public class MainActivityFragment extends Fragment {
                         mMoviesList.get(i).getPoster(), mMoviesList.get(i).getThumbNail(),
                         mMoviesList.get(i).getOverview(), mMoviesList.get(i).getVoteAvg(),
                         mMoviesList.get(i).getReleaseDate());
-                DetailActivityFragment detail = (DetailActivityFragment) getActivity().getSupportFragmentManager()
+                DetailFragment detail = (DetailFragment) getActivity().getSupportFragmentManager()
                         .findFragmentById(R.id.fragment_detail);
                 if (detail == null) {
                     Intent intent = new Intent(getActivity(),DetailActivity.class);
@@ -113,6 +117,26 @@ public class MainActivityFragment extends Fragment {
     public void onAttach(Context context) {
         this.mContext = context;
         super.onAttach(context);
+    }
+
+    public void onListChanged() {
+        updateMovies();
+        getLoaderManager().restartLoader(LOADER_ID, null, this);
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        return null;
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+
     }
 
     public interface Callback {

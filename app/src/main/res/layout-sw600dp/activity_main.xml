@@ -23,7 +23,7 @@
     </android.support.design.widget.AppBarLayout>
         <fragment
             android:id="@+id/main_fragment"
-            android:name="com.casasw.popularmovies.MainActivityFragment"
+            android:name="com.casasw.popularmovies.MainFragment"
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="match_parent"
