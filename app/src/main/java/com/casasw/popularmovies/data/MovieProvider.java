@@ -36,7 +36,7 @@ public class MovieProvider extends ContentProvider {
                 MovieContract.MovieEntry.TABLE_NAME + " INNER JOIN " +
                         MovieContract.FavoritesEntry.TABLE_NAME +
                         " ON " + MovieContract.MovieEntry.TABLE_NAME +
-                        "." + MovieContract.MovieEntry._ID +
+                        "." + MovieContract.MovieEntry.COLUMN_MOVIE_ID +
                         " = " + MovieContract.FavoritesEntry.TABLE_NAME +
                         "." + MovieContract.FavoritesEntry.COLUMN_MOVIE_KEY
         );

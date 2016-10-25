@@ -76,7 +76,7 @@ public class TestDb extends AndroidTestCase {
 
         // if this fails, it means that your database doesn't contain both the location entry
         // and weather entry tables
-        assertTrue("Error: Your database was created without both the location entry and weather entry tables",
+        assertTrue("Error: Your database was created without tables",
                 tableNameHashSet.isEmpty());
 
         // now, do our tables contain the correct columns?
@@ -116,7 +116,7 @@ public class TestDb extends AndroidTestCase {
         where you can uncomment out the "createFavoriteValues" function.  You can
         also make use of the ValidateCurrentRecord function from within TestUtilities.
     */
-    public void testFavoritesTable() {
+    public void testInserts() {
         long in = insertFavorite();
         assertTrue("Error: Insertion in location table has fail.", in != -1 );
 
@@ -132,10 +132,10 @@ public class TestDb extends AndroidTestCase {
         // First insert the location, and then use the locationRowId to insert
         // the weather. Make sure to cover as many failure cases as you can.
         //long locationRowId = insertFavorite();
-        // Instead of rewriting all of the code we've already written in testFavoritesTable
+        // Instead of rewriting all of the code we've already written in testInserts
         // we can move this code to insertFavorite and then call insertFavorite from both
         // tests. Why move it? We need the code to return the ID of the inserted location
-        // and our testFavoritesTable can only return void because it's a test.
+        // and our testInserts can only return void because it's a test.
 
         // First step: Get reference to writable database
         SQLiteDatabase db = new MovieDbHelper(
@@ -216,8 +216,8 @@ public class TestDb extends AndroidTestCase {
 
     /*
         Students: This is a helper method for the testMovieTable quiz. You can move your
-        code from testFavoritesTable to here so that you can call this code from both
-        testMovieTable and testFavoritesTable.
+        code from testInserts to here so that you can call this code from both
+        testMovieTable and testInserts.
      */
     public long insertFavorite() {
         String testMovieKey = "010101";

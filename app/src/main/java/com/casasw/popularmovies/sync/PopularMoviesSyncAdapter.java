@@ -35,17 +35,9 @@ public class PopularMoviesSyncAdapter extends AbstractThreadedSyncAdapter {
     public final String LOG_TAG = PopularMoviesSyncAdapter.class.getSimpleName();
     // Interval at which to sync with the weather, in milliseconds.
     // 60 seconds (1 minute) * 180 = 3 hours
-    public static final int SYNC_INTERVAL = 60*180;
+    public static final int SYNC_INTERVAL = 30;//60*180;
     public static final int SYNC_FLEXTIME = SYNC_INTERVAL/3;
 
-    // these indices must match the projection
-    private static final int INDEX_WEATHER_ID = 0;
-    private static final int INDEX_MAX_TEMP = 1;
-    private static final int INDEX_MIN_TEMP = 2;
-    private static final int INDEX_SHORT_DESC = 3;
-    private static final int INDEX_CITY_NAME = 4;
-    private static final long DAY_IN_MILLIS = 1000 * 60 * 60 * 24;
-    private static final int WEATHER_NOTIFICATION_ID = 3004;
 
     public PopularMoviesSyncAdapter(Context context, boolean autoInitialize) {
         super(context, autoInitialize);
@@ -61,67 +53,69 @@ public class PopularMoviesSyncAdapter extends AbstractThreadedSyncAdapter {
         BufferedReader reader = null;
 
         String moviesJsonStr = null;
-        String movieList = Utilities.getMoviesList(getContext());;
+        String movieList = Utilities.getMoviesList(getContext());
         //Log.v(LOG_TAG, "Order by: " + movieList);
-        try {
+        if (!movieList.equals(getContext().getString(R.string.pref_order_favorites_entry))) {
+            try {
 
-            final String APPID_PARAM = "api_key";
+                final String APIID_PARAM = "api_key";
 
-            Uri.Builder builder = new Uri.Builder();
-            builder.scheme("http")
-                    .authority("api.themoviedb.org")
-                    .appendPath("3")
-                    .appendPath("movie")
-                    .appendPath(movieList)
-                    .appendQueryParameter(APPID_PARAM, BuildConfig.MovieDBApiKey);
-            URL url = new URL(builder.build().toString());
-            //Log.v(LOG_TAG, "URL: "+url.toString());
-            urlConnection = (HttpURLConnection) url.openConnection();
-            urlConnection.setRequestMethod("GET");
-            urlConnection.connect();
-            InputStream inputStream = urlConnection.getInputStream();
-            StringBuffer buffer = new StringBuffer();
-            if (inputStream == null) {
+                Uri.Builder builder = new Uri.Builder();
+                builder.scheme("http")
+                        .authority("api.themoviedb.org")
+                        .appendPath("3")
+                        .appendPath("movie")
+                        .appendPath(movieList)
+                        .appendQueryParameter(APIID_PARAM, BuildConfig.MovieDBApiKey);
+                URL url = new URL(builder.build().toString());
+                Log.v(LOG_TAG, "URL: "+url.toString());
+                urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setRequestMethod("GET");
+                urlConnection.connect();
+                InputStream inputStream = urlConnection.getInputStream();
+                StringBuffer buffer = new StringBuffer();
+                if (inputStream == null) {
+                    return;
+                }
+                reader = new BufferedReader(new InputStreamReader(inputStream));
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    // Since it's JSON, adding a newline isn't necessary (it won't affect parsing)
+                    // But it does make debugging a *lot* easier if you print out the completed
+                    // buffer for debugging.
+                    buffer.append(line + "\n");
+                }
+
+                if (buffer.length() == 0) {
+                    // Stream was empty.  No point in parsing.
+                    moviesJsonStr = null;
+                }
+                moviesJsonStr = buffer.toString();
+
+
+            }catch (Exception e) {
+                Log.e(LOG_TAG, e.toString());
                 moviesJsonStr = null;
-            }
-            reader = new BufferedReader(new InputStreamReader(inputStream));
-            String line;
-            while ((line = reader.readLine()) != null) {
-                // Since it's JSON, adding a newline isn't necessary (it won't affect parsing)
-                // But it does make debugging a *lot* easier if you print out the completed
-                // buffer for debugging.
-                buffer.append(line + "\n");
-            }
-
-            if (buffer.length() == 0) {
-                // Stream was empty.  No point in parsing.
-                moviesJsonStr = null;
-            }
-            moviesJsonStr = buffer.toString();
-
-
-        }catch (Exception e) {
-            Log.e(LOG_TAG, e.toString());
-            moviesJsonStr = null;
-        } finally {
-            if (urlConnection != null) {
-                urlConnection.disconnect();
-            }
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (final IOException e) {
-                    Log.e(LOG_TAG, "Error closing stream", e);
+            } finally {
+                if (urlConnection != null) {
+                    urlConnection.disconnect();
+                }
+                if (reader != null) {
+                    try {
+                        reader.close();
+                    } catch (final IOException e) {
+                        Log.e(LOG_TAG, "Error closing stream", e);
+                    }
                 }
             }
-        }
 
-        try {
-            insertMoviesDataFromJson(moviesJsonStr, movieList);
+            try {
+                insertMoviesDataFromJson(moviesJsonStr, movieList);
 
-        }catch (JSONException e ){
-            Log.e(LOG_TAG, e.getMessage(), e);
-            e.printStackTrace();
+            }catch (JSONException e ){
+                Log.e(LOG_TAG, e.getMessage(), e);
+                e.printStackTrace();
+            }
         }
 
     }
@@ -161,7 +155,7 @@ public class PopularMoviesSyncAdapter extends AbstractThreadedSyncAdapter {
 
             ContentValues movieValues = new ContentValues();
 
-            movieValues.put(MovieContract.MovieEntry._ID, id);
+            movieValues.put(MovieContract.MovieEntry.COLUMN_MOVIE_ID, id);
             movieValues.put(MovieContract.MovieEntry.COLUMN_POSTER_PATH, poster_path);
             movieValues.put(MovieContract.MovieEntry.COLUMN_OVERVIEW, overview);
             movieValues.put(MovieContract.MovieEntry.COLUMN_ORIGINAL_TITLE, original_title);
@@ -181,13 +175,6 @@ public class PopularMoviesSyncAdapter extends AbstractThreadedSyncAdapter {
         }
 
     }
-    /*
-     * Take the String representing the complete forecast in JSON Format and
-     * pull out the data we need to construct the Strings needed for the wireframes.
-     *
-     * Fortunately parsing is easy:  constructor takes the JSON string and converts it
-     * into an Object hierarchy for us.
-     * */
 
 
 

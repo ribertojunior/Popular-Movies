@@ -1,6 +1,7 @@
 package com.casasw.popularmovies;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
@@ -35,6 +36,7 @@ public class MainActivity extends AppCompatActivity implements MainFragment.Call
         }
 
         PopularMoviesSyncAdapter.initializeSyncAdapter(this);
+        PopularMoviesSyncAdapter.syncImmediately(this);
 
 
     }
@@ -72,26 +74,26 @@ public class MainActivity extends AppCompatActivity implements MainFragment.Call
             }
             DetailFragment df = (DetailFragment) getSupportFragmentManager().findFragmentByTag(DETAILFRAGMENT_TAG);
             if (df != null){
-                df.onListChanged(list);
+                df.onListChanged();
             }
             mList = list;
         }
     }
 
     @Override
-    public void onItemSelected(Movie movie) {
+    public void onItemSelected(Uri movieUri) {
         if (mTwoPane) {
-            Intent intent = new Intent(this,DetailActivity.class);
-            intent.putExtra("EXTRA_MOVIE", movie);
-            //startActivity(intent);
 
+            //startActivity(intent);
+            Bundle args =  new Bundle();
+            args.putParcelable(DetailFragment.DETAIL_URI, movieUri);
             DetailFragment detailFragment = new DetailFragment();
-            detailFragment.setArguments(intent.getExtras());
+            detailFragment.setArguments(args);
             FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
             ft.replace(R.id.detail_container, detailFragment);
             ft.commit();
         } else {
-            Intent intent = new Intent(this, DetailActivity.class).putExtra("EXTRA_MOVIE",movie);
+            Intent intent = new Intent(this, DetailActivity.class).setData(movieUri);
             startActivity(intent);
         }
 

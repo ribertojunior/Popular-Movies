@@ -26,7 +26,7 @@ public class MovieContract {
                 ContentResolver.CURSOR_ITEM_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_MOVIES;
         
         public static final String TABLE_NAME = "movie";
-        public static final String _ID = "movie_id";
+        public static final String COLUMN_MOVIE_ID = "movie_id";
         public static final String COLUMN_POSTER_PATH = "poster_path";
         public static final String COLUMN_OVERVIEW = "overview";
         public static final String COLUMN_ORIGINAL_TITLE = "original_title";
@@ -38,6 +38,10 @@ public class MovieContract {
         public static Uri buildMovieUri(long id) {
             return ContentUris.withAppendedId(CONTENT_URI, id);
         }
+
+        /*public static Uri buildMovieUriWithList(String movieList) {
+            return CONTENT_URI.buildUpon().appendPath(movieList).build();
+        }*/
 
         public static String getMovieListFromUri(Uri uri) {
             return uri.getPathSegments().get(0);
@@ -54,6 +58,9 @@ public class MovieContract {
         public static Uri buildFavoritesUri(long id) {
             return ContentUris.withAppendedId(CONTENT_URI, id);
         }
+       /* public static Uri buildFavoritesUriWithList(String movieList) {
+            return CONTENT_URI.buildUpon().appendPath(movieList).build();
+        }*/
 
         public static final String TABLE_NAME = "favorites";
 
@@ -76,7 +83,7 @@ public class MovieContract {
 
         public static final String TABLE_NAME = "reviews";
 
-        public static final String _ID = "review_id";
+        public static final String COLUMN_REVIEW_ID = "review_id";
 
         public static final String COLUMN_MOVIE_KEY = "movie_id";
 

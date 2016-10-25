@@ -55,7 +55,7 @@ public class TestUtilities extends AndroidTestCase {
     static ContentValues createMoviesValues() {
         ContentValues values = new ContentValues();
         long movieId = 1001;
-        values.put(MovieContract.MovieEntry._ID, movieId);
+        values.put(MovieContract.MovieEntry.COLUMN_MOVIE_ID, movieId);
         values.put(MovieContract.MovieEntry.COLUMN_POSTER_PATH, "/aisfsaifb28y842");
         values.put(MovieContract.MovieEntry.COLUMN_OVERVIEW, "Filme bosta dozovo.");
         values.put(MovieContract.MovieEntry.COLUMN_ORIGINAL_TITLE, "Meuzovo. De novo!");
