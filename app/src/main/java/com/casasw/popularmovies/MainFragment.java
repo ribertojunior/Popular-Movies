@@ -32,7 +32,8 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
 
     private static final String[] MOVIE_COLUMNS = {
             MovieContract.MovieEntry.TABLE_NAME + "." + MovieContract.MovieEntry._ID,
-            MovieContract.MovieEntry.TABLE_NAME + "." + MovieContract.MovieEntry.COLUMN_ORIGINAL_TITLE,
+            MovieContract.MovieEntry.COLUMN_MOVIE_ID,
+            MovieContract.MovieEntry.COLUMN_ORIGINAL_TITLE,
             MovieContract.MovieEntry.COLUMN_RELEASE_DATE,
             MovieContract.MovieEntry.COLUMN_POSTER_PATH,
             MovieContract.MovieEntry.COLUMN_OVERVIEW,
@@ -40,15 +41,16 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
             MovieContract.MovieEntry.COLUMN_BACKDROP_PATH,
             MovieContract.MovieEntry.COLUMN_MOVIE_LIST
     };
-    static final int COL_MOVIE_ID = 0;
-    static final int COL_ORIGINAL_TITLE = 1;
-    static final int COL_RELEASE_DATE = 2;
-    static final int COL_POSTER_PATH = 3;
-    static final int COL_OVERVIEW = 4;
-    static final int COL_VOTE_AVARAGE = 5;
-    static final int COL_BACKDROP_PATH = 6;
-    static final int COL_MOVIE_LIST = 7;
-
+    static final int COL_ID = 0;
+    static final int COL_MOVIE_ID = 1;
+    static final int COL_ORIGINAL_TITLE = 2;
+    static final int COL_RELEASE_DATE = 3;
+    static final int COL_POSTER_PATH = 4;
+    static final int COL_OVERVIEW = 5;
+    static final int COL_VOTE_AVARAGE = 6;
+    static final int COL_BACKDROP_PATH = 7;
+    static final int COL_MOVIE_LIST = 8;
+    private String mList;
 
 
     public MainFragment() {
@@ -63,15 +65,15 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
         getLoaderManager().restartLoader(LOADER_ID, null, this);
     }
 
-    public static String[] getMovieColumns() {
-        return MOVIE_COLUMNS;
-    }
+
 
     @Override
     public View onCreateView(final LayoutInflater inflater, final ViewGroup container,
                              Bundle savedInstanceState) {
 
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
+        mList = Utilities.getMoviesList(getActivity());
+
 
         mGridView = (GridView) rootView.findViewById(R.id.grid_view_posters);
         mMovieAdapter = new MovieAdapter(getActivity(), null, 0);
@@ -121,7 +123,11 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
     @Override
     public void onResume() {
         super.onResume();
-        //updateMovies();
+        String list = Utilities.getMoviesList(getActivity());
+        if (list != null && !list.equals(mList)) {
+           onListChanged();
+            mList = list;
+        }
     }
 
     @Override

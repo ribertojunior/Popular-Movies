@@ -44,7 +44,11 @@ public class MovieContract {
         }*/
 
         public static String getMovieListFromUri(Uri uri) {
-            return uri.getPathSegments().get(0);
+            return uri.getPathSegments().get(1);
+        }
+
+        public static String getMovieIDfromUri(Uri uri){
+            return uri.getPathSegments().get(1);
         }
     }
 

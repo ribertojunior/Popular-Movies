@@ -7,8 +7,7 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".DetailFragment"
-    tools:showIn="@layout/activity_detail"
-    android:id="@+id/fragment_detail">
+    >
 
 
     <ScrollView
@@ -27,7 +26,6 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:id="@+id/imageView"
-                android:src="@drawable/place_holder"
                 android:layout_alignParentTop="true"
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentStart="true" />
@@ -36,7 +34,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/voteAvgText"
-                android:text="7.8"
                 android:layout_marginTop="20dp"
                 android:layout_below="@+id/imageView"
                 android:layout_alignLeft="@+id/dateText"
@@ -75,7 +72,6 @@
                 android:inputType="date"
                 android:ems="10"
                 android:id="@+id/dateText"
-                android:text="08/24/2016"
                 android:textSize="20sp"
                 android:layout_alignBottom="@+id/ReleaseDateText"
                 android:layout_toRightOf="@+id/ReleaseDateText"
@@ -108,7 +104,6 @@
                 android:id="@+id/overviewText"
                 android:textSize="20sp"
                 android:textColor="@color/colorText"
-                android:text="0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789"
                 android:layout_below="@+id/ReleaseDateText"
                 android:layout_alignRight="@+id/dateText"
                 android:layout_alignEnd="@+id/dateText" />
@@ -172,7 +167,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/movieTitleText"
-        android:text="Jason Bourne"
         android:textStyle="bold"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"

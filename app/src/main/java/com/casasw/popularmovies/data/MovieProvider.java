@@ -10,6 +10,8 @@ import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.support.annotation.Nullable;
 
+import com.casasw.popularmovies.Utilities;
+
 import static com.casasw.popularmovies.data.MovieContract.ReviewsEntry.COLUMN_AUTHOR;
 import static com.casasw.popularmovies.data.MovieContract.ReviewsEntry.COLUMN_URL;
 
@@ -56,6 +58,9 @@ public class MovieProvider extends ContentProvider {
     private static final String sMovieListSelection =
             MovieContract.MovieEntry.TABLE_NAME+
                     "." + MovieContract.MovieEntry.COLUMN_MOVIE_LIST + " = ?";
+    private static final String sMovieIDSelection =
+            MovieContract.MovieEntry.TABLE_NAME+
+                    "." + MovieContract.MovieEntry.COLUMN_MOVIE_ID + " = ?";
 
     private Cursor getFavoritesList(Uri uri, String[] projection, String sortOrder) {
 
@@ -144,12 +149,29 @@ public class MovieProvider extends ContentProvider {
     @Override
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         Cursor retCursor;
+
         switch (sUriMatcher.match(uri)) {
             case MOVIE: {
+                if (selectionArgs == null) {
+                    selectionArgs = new String[] {Utilities.getMoviesList(getContext())};
+                }
                 retCursor = mOpenHelper.getReadableDatabase().query(
                         MovieContract.MovieEntry.TABLE_NAME,
                         projection,
-                        selection,
+                        sMovieListSelection,
+                        selectionArgs,
+                        null,
+                        null,
+                        sortOrder
+                );
+                break;
+            }
+            case MOVIE_ID: {
+                selectionArgs = new String[]{MovieContract.MovieEntry.getMovieIDfromUri(uri)};
+                retCursor = mOpenHelper.getReadableDatabase().query(
+                        MovieContract.MovieEntry.TABLE_NAME,
+                        projection,
+                        sMovieIDSelection,
                         selectionArgs,
                         null,
                         null,

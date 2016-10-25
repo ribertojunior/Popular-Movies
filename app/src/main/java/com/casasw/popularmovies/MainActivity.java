@@ -67,7 +67,7 @@ public class MainActivity extends AppCompatActivity implements MainFragment.Call
     protected void onResume() {
         super.onResume();
         String list = Utilities.getMoviesList(this);
-        if (list != null && !list.equals(list)) {
+        if (list != null && !list.equals(mList)) {
             MainFragment mf =  (MainFragment) getSupportFragmentManager().findFragmentById(R.id.main_fragment);
             if (mf != null) {
                 mf.onListChanged();
