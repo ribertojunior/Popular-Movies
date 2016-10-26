@@ -18,7 +18,9 @@ package com.casasw.popularmovies.data;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteQueryBuilder;
 import android.test.AndroidTestCase;
+import android.util.Log;
 
 import java.util.HashSet;
 
@@ -171,7 +173,7 @@ public class TestDb extends AndroidTestCase {
 
         // Insert ContentValues into database and get a row ID back
         long in = db.insert(MovieContract.ReviewsEntry.TABLE_NAME,null, cv);
-        assertTrue("Error: Insertion in movie table has fail.", in != -1 );
+        assertTrue("Error: Insertion in table has fail.", in != -1 );
         // Query the database and receive a Cursor back
         Cursor c = db.query(MovieContract.ReviewsEntry.TABLE_NAME, null, null, null, null, null, null);
         // Move the cursor to a valid database row
@@ -184,6 +186,101 @@ public class TestDb extends AndroidTestCase {
         // Finally, close the cursor and database
         c.close();
         db.close();
+    }
+
+    public void testInnerJoin() {
+        SQLiteDatabase db = new MovieDbHelper(
+                this.mContext).getWritableDatabase();
+        ContentValues cv = TestUtilities.createMoviesValues();
+
+        long in = db.insert(MovieContract.MovieEntry.TABLE_NAME, null, cv);
+        assertTrue("Error: Insertion in movie table has fail.", in != -1 );
+
+        for (int j = 0; j<3;j++) {
+            cv = TestUtilities.createReviewsValues(cv.getAsLong(MovieContract.MovieEntry.COLUMN_MOVIE_ID));
+
+            in = db.insert(MovieContract.ReviewsEntry.TABLE_NAME, null, cv);
+            assertTrue("Error: Insertion in ReviewsEntry table has fail.", in != -1 );
+
+            cv = TestUtilities.createTrailersValues(cv.getAsLong(MovieContract.ReviewsEntry.COLUMN_MOVIE_KEY));
+
+            in = db.insert(MovieContract.TrailersEntry.TABLE_NAME, null, cv);
+            assertTrue("Error: Insertion in TrailersEntry table has fail.", in != -1 );
+        }
+
+        SQLiteQueryBuilder sMovieQueryBuilder;
+        sMovieQueryBuilder = new SQLiteQueryBuilder();
+        sMovieQueryBuilder.setTables(
+                MovieContract.MovieEntry.TABLE_NAME + " INNER JOIN " +
+                        MovieContract.ReviewsEntry.TABLE_NAME +
+                        " ON " + MovieContract.MovieEntry.TABLE_NAME +
+                        "."  + MovieContract.MovieEntry.COLUMN_MOVIE_ID +
+                        " = " + MovieContract.ReviewsEntry.TABLE_NAME +
+                        "."  + MovieContract.ReviewsEntry.COLUMN_MOVIE_KEY
+
+        );
+        String selection = MovieContract.MovieEntry.TABLE_NAME +
+                "." + MovieContract.MovieEntry.COLUMN_MOVIE_ID + " = ? AND " +
+                MovieContract.ReviewsEntry.TABLE_NAME +
+                "." + MovieContract.ReviewsEntry.COLUMN_MOVIE_KEY + " = ?";
+        String id =  cv.getAsString(MovieContract.TrailersEntry.COLUMN_MOVIE_KEY);
+        String[] selectionArgs = new String[]{id, id};
+
+        Cursor c = sMovieQueryBuilder.query(db, TestUtilities.MOVIE_REVIEWS_COLUMNS, selection, selectionArgs, null, null, null);
+        assertTrue("Error REVIEWS inner join returning zero rows. ", c.moveToFirst());
+        Log.v(LOG_TAG, "testInnerJoin: Reviews");
+
+        String col = "";
+        for (int i =0;i<c.getColumnCount();i++) {
+            col =  col + "["+c.getColumnName(i)+"] - ";
+        }
+        String values = "";
+        do {
+            for (int i =0;i<c.getColumnCount();i++) {
+                values =  values + c.getString(i) +" - ";
+            }
+            values = values + "\n";
+
+        }while (c.moveToNext());
+        Log.v(LOG_TAG, col);
+        Log.v(LOG_TAG, values);
+
+        sMovieQueryBuilder = new SQLiteQueryBuilder();
+        sMovieQueryBuilder.setTables(
+                MovieContract.MovieEntry.TABLE_NAME + " INNER JOIN " +
+                        MovieContract.TrailersEntry.TABLE_NAME +
+                        " ON " + MovieContract.MovieEntry.TABLE_NAME +
+                        "."  + MovieContract.MovieEntry.COLUMN_MOVIE_ID +
+                        " = " + MovieContract.TrailersEntry.TABLE_NAME +
+                        "."  + MovieContract.TrailersEntry.COLUMN_MOVIE_KEY
+        );
+        selection = MovieContract.MovieEntry.TABLE_NAME +
+                "." + MovieContract.MovieEntry.COLUMN_MOVIE_ID + " = ? AND " +
+                MovieContract.TrailersEntry.TABLE_NAME +
+                "." + MovieContract.TrailersEntry.COLUMN_MOVIE_KEY + " = ? ";
+
+
+
+        c = sMovieQueryBuilder.query(db, TestUtilities.MOVIE_TRAILERS_COLUMNS, selection, selectionArgs, null, null, null);
+        assertTrue("Error trailers inner join returning zero rows. ", c.moveToFirst());
+        Log.v(LOG_TAG, "testInnerJoin: Trailers");
+
+        col = "";
+        for (int i =0;i<c.getColumnCount();i++) {
+            col =  col + "["+c.getColumnName(i)+"] - ";
+        }
+        values = "";
+        do {
+            for (int i =0;i<c.getColumnCount();i++) {
+                values =  values + c.getString(i) +" - ";
+            }
+            values = values + "\n";
+
+        }while (c.moveToNext());
+        Log.v(LOG_TAG, col);
+        Log.v(LOG_TAG, values);
+
+
     }
 
     public void testTrailerTable(){

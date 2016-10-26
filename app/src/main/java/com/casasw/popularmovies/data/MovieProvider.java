@@ -48,9 +48,62 @@ public class MovieProvider extends ContentProvider {
     static {
         sMovieQueryBuilder = new SQLiteQueryBuilder();
         sMovieQueryBuilder.setTables(
-                MovieContract.MovieEntry.TABLE_NAME
+                MovieContract.MovieEntry.TABLE_NAME + " INNER JOIN " +
+                        MovieContract.ReviewsEntry.TABLE_NAME +
+                        " ON " + MovieContract.MovieEntry.TABLE_NAME +
+                        "."  + MovieContract.MovieEntry.COLUMN_MOVIE_ID +
+                        " = " + MovieContract.ReviewsEntry.TABLE_NAME +
+                        "."  + MovieContract.ReviewsEntry.COLUMN_MOVIE_KEY +
+                        " INNER JOIN " +
+                        MovieContract.TrailersEntry.TABLE_NAME +
+                        " ON " + MovieContract.MovieEntry.TABLE_NAME +
+                        "."  + MovieContract.MovieEntry.COLUMN_MOVIE_ID +
+                        " = " + MovieContract.FavoritesEntry.TABLE_NAME +
+                        "."  + MovieContract.FavoritesEntry.COLUMN_MOVIE_KEY
         );
     }
+    /*New query builders*/
+    private static final SQLiteQueryBuilder sMovieTrailerQueryBuilder;
+    static {
+        sMovieTrailerQueryBuilder = new SQLiteQueryBuilder();
+        sMovieTrailerQueryBuilder.setTables(
+                MovieContract.MovieEntry.TABLE_NAME + " INNER JOIN " +
+                        MovieContract.TrailersEntry.TABLE_NAME +
+                        " ON " + MovieContract.MovieEntry.TABLE_NAME +
+                        "."  + MovieContract.MovieEntry.COLUMN_MOVIE_ID +
+                        " = " + MovieContract.TrailersEntry.TABLE_NAME +
+                        "."  + MovieContract.TrailersEntry.COLUMN_MOVIE_KEY
+        );
+    }
+
+    private static final SQLiteQueryBuilder sMovieReviewsQueryBuilder;
+    static {
+        sMovieReviewsQueryBuilder = new SQLiteQueryBuilder();
+
+        sMovieReviewsQueryBuilder.setTables(
+                MovieContract.MovieEntry.TABLE_NAME + " INNER JOIN " +
+                        MovieContract.ReviewsEntry.TABLE_NAME +
+                        " ON " + MovieContract.MovieEntry.TABLE_NAME +
+                        "." + MovieContract.MovieEntry.COLUMN_MOVIE_ID +
+                        " = " + MovieContract.ReviewsEntry.TABLE_NAME +
+                        "." + MovieContract.ReviewsEntry.COLUMN_MOVIE_KEY
+
+        );
+    }
+
+    /*End of new query builders*/
+
+    private static final String sMovieTrailersSelection =
+            MovieContract.MovieEntry.TABLE_NAME +
+                    "." + MovieContract.MovieEntry.COLUMN_MOVIE_ID + " = ? AND " +
+                    MovieContract.TrailersEntry.TABLE_NAME +
+                    "." + MovieContract.TrailersEntry.COLUMN_MOVIE_KEY + " = ? ";
+
+    public static final String sMovieReviewsSelection =
+            MovieContract.MovieEntry.TABLE_NAME +
+                    "." + MovieContract.MovieEntry.COLUMN_MOVIE_ID + " = ? AND " +
+                    MovieContract.ReviewsEntry.TABLE_NAME +
+                    "." + MovieContract.ReviewsEntry.COLUMN_MOVIE_KEY + " = ?";
 
     private static final String sMovieFavoritesSelection =
             MovieContract.FavoritesEntry.TABLE_NAME + ";";

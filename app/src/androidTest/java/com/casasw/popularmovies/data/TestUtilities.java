@@ -23,6 +23,49 @@ import java.util.Set;
 public class TestUtilities extends AndroidTestCase {
     static final String TEST_MOVIE_KEY = "1001";
     static final String TEST_MOVIE_TITLE = "Meuzovo. De novo!";
+    static final String[] MOVIE_REVIEWS_COLUMNS = {
+            MovieContract.MovieEntry.TABLE_NAME + "." + MovieContract.MovieEntry.COLUMN_MOVIE_ID,
+            MovieContract.MovieEntry.COLUMN_ORIGINAL_TITLE,
+            MovieContract.MovieEntry.COLUMN_RELEASE_DATE,
+            MovieContract.MovieEntry.COLUMN_POSTER_PATH,
+            MovieContract.MovieEntry.COLUMN_OVERVIEW,
+            MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE,
+            MovieContract.MovieEntry.COLUMN_BACKDROP_PATH,
+            MovieContract.MovieEntry.COLUMN_MOVIE_LIST,
+            MovieContract.ReviewsEntry.COLUMN_AUTHOR,
+            MovieContract.ReviewsEntry.COLUMN_URL
+
+    };
+    static final int COL_ID = 0;
+    static final int COL_MOVIE_ID = 1;
+    static final int COL_ORIGINAL_TITLE = 2;
+    static final int COL_RELEASE_DATE = 3;
+    static final int COL_POSTER_PATH = 4;
+    static final int COL_OVERVIEW = 5;
+    static final int COL_VOTE_AVARAGE = 6;
+    static final int COL_BACKDROP_PATH = 7;
+    static final int COL_MOVIE_LIST = 8;
+    static final int COL_REVIEW_AUTHOR = 9;
+    static final int COL_REVIEW_URL = 10;
+
+    static final String[] MOVIE_TRAILERS_COLUMNS = {
+            MovieContract.MovieEntry.TABLE_NAME + "." + MovieContract.MovieEntry.COLUMN_MOVIE_ID,
+            MovieContract.MovieEntry.COLUMN_ORIGINAL_TITLE,
+            MovieContract.MovieEntry.COLUMN_RELEASE_DATE,
+            MovieContract.MovieEntry.COLUMN_POSTER_PATH,
+            MovieContract.MovieEntry.COLUMN_OVERVIEW,
+            MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE,
+            MovieContract.MovieEntry.COLUMN_BACKDROP_PATH,
+            MovieContract.MovieEntry.COLUMN_MOVIE_LIST,
+            MovieContract.TrailersEntry.COLUMN_SITE,
+            MovieContract.TrailersEntry.COLUMN_NAME,
+            MovieContract.TrailersEntry.COLUMN_KEY,
+
+    };
+    static final int COL_TRAILER_SITE = 9;
+    static final int COL_TRAILER_NAME = 10;
+    static final int COL_TRAILER_KEY = 11;
+
 
     static void validateCursor(String error, Cursor valueCursor, ContentValues expectedValues) {
         assertTrue("Empty cursor returned. " + error, valueCursor.moveToFirst());
@@ -76,6 +119,35 @@ public class TestUtilities extends AndroidTestCase {
         ContentValues testValues = new ContentValues();
         testValues.put(MovieContract.FavoritesEntry.COLUMN_MOVIE_KEY, id);
         testValues.put(MovieContract.FavoritesEntry.COLUMN_ORIGINAL_TITLE, TEST_MOVIE_TITLE);
+
+        return testValues;
+    }
+
+
+    static ContentValues createReviewsValues(long id) {
+        // Create a new map of values, where column names are the keys
+        ContentValues testValues = new ContentValues();
+        long review_id = (long) Math.floor(Math.random()*1000);
+        testValues.put(MovieContract.ReviewsEntry.COLUMN_REVIEW_ID, review_id);
+        testValues.put(MovieContract.ReviewsEntry.COLUMN_MOVIE_KEY, id);
+        testValues.put(MovieContract.ReviewsEntry.COLUMN_AUTHOR, "Meuzovo ["+review_id+"]");
+        testValues.put(MovieContract.ReviewsEntry.COLUMN_URL, "https://meuzovo.com/"+review_id);
+
+        return testValues;
+    }
+
+    /*
+       Students: You can uncomment this helper function once you have finished creating the
+       LocationEntry part of the WeatherContract.
+    */
+    static ContentValues createTrailersValues(long id) {
+        // Create a new map of values, where column names are the keys
+        ContentValues testValues = new ContentValues();
+        long randomAdd = (long) Math.floor(Math.random()*1000);
+        testValues.put(MovieContract.TrailersEntry.COLUMN_MOVIE_KEY, id);
+        testValues.put(MovieContract.TrailersEntry.COLUMN_KEY, "fk4BbF7B29w"+randomAdd);
+        testValues.put(MovieContract.TrailersEntry.COLUMN_NAME, "Meuzovo ["+randomAdd+"] Original Theatrical Trailer");
+        testValues.put(MovieContract.TrailersEntry.COLUMN_SITE, "youtube");
 
         return testValues;
     }
