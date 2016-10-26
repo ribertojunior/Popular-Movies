@@ -23,7 +23,10 @@ public class MovieContract {
         public static final String CONTENT_TYPE =
                 ContentResolver.CURSOR_DIR_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_MOVIES;
         public static final String CONTENT_ITEM_TYPE = 
-                ContentResolver.CURSOR_ITEM_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_MOVIES;
+                ContentResolver.CURSOR_ITEM_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" +
+                        PATH_MOVIES +"/" +
+                        PATH_REVIEWS+"/"+
+                        PATH_TRAILERS;
         
         public static final String TABLE_NAME = "movie";
         public static final String COLUMN_MOVIE_ID = "movie_id";
@@ -39,6 +42,11 @@ public class MovieContract {
             return ContentUris.withAppendedId(CONTENT_URI, id);
         }
 
+        public static Uri buildMovieWithTrailersAndReviewsUri(long id){
+            return ContentUris.withAppendedId(CONTENT_URI.buildUpon().appendPath(PATH_REVIEWS)
+                    .appendPath(PATH_TRAILERS).build(), id);
+        }
+
         /*public static Uri buildMovieUriWithList(String movieList) {
             return CONTENT_URI.buildUpon().appendPath(movieList).build();
         }*/
@@ -47,8 +55,9 @@ public class MovieContract {
             return uri.getPathSegments().get(1);
         }
 
-        public static String getMovieIDfromUri(Uri uri){
-            return uri.getPathSegments().get(1);
+        public static String getMovieIDFromUri(Uri uri){
+            int i = uri.getPathSegments().size() - 1;
+            return uri.getPathSegments().get(i);
         }
     }
 

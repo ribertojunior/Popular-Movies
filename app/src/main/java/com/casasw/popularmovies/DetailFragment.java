@@ -40,7 +40,13 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             MovieContract.MovieEntry.COLUMN_OVERVIEW,
             MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE,
             MovieContract.MovieEntry.COLUMN_BACKDROP_PATH,
-            MovieContract.MovieEntry.COLUMN_MOVIE_LIST
+            MovieContract.MovieEntry.COLUMN_MOVIE_LIST,
+            MovieContract.ReviewsEntry.COLUMN_AUTHOR,
+            MovieContract.ReviewsEntry.COLUMN_URL,
+            MovieContract.TrailersEntry.COLUMN_SITE,
+            MovieContract.TrailersEntry.COLUMN_NAME,
+            MovieContract.TrailersEntry.COLUMN_KEY,
+
     };
     static final int COL_ID = 0;
     static final int COL_MOVIE_ID = 1;
@@ -51,6 +57,11 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     static final int COL_VOTE_AVARAGE = 6;
     static final int COL_BACKDROP_PATH = 7;
     static final int COL_MOVIE_LIST = 8;
+    static final int COL_REVIEW_AUTHOR = 9;
+    static final int COL_REVIEW_URL = 10;
+    static final int COL_TRAILER_SITE = 11;
+    static final int COL_TRAILER_NAME = 12;
+    static final int COL_TRAILER_KEY = 13;
 
 
     public DetailFragment() {
@@ -114,7 +125,11 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             viewHolder.mStar.setImageResource(android.R.drawable.btn_star_big_off);
             /*
             Testar se filmes está na tabela de favoritos, se sim mudar para star_nig_on
-            implementar o clicklistener para adicionar/remover o filme dos favoitos
+            implementar o clicklistener para adicionar/remover o filme dos favoritos
+            ------
+             Preciso alterar o inner join para ser único (já fiz e já fiz alteraçoes no provider) e preciso testar como preencher a tela evitando repetir dados ou instruções,
+             pois com a inner join única teremos registros repetidos com alteração apenas nos campos da reviews e da trailer.
+             Penso em um método que edite esses dados, recebe o cursor duplicado e retorna um cv talvez com os dados dos trailer e dos reviews.
              */
 
         }

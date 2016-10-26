@@ -103,7 +103,7 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
                 Cursor cursor = (Cursor) adapterView.getItemAtPosition(i);
                 if (cursor != null) {
                     ((Callback) getActivity())
-                            .onItemSelected(MovieContract.MovieEntry.buildMovieUri(cursor.getLong(COL_MOVIE_ID)));
+                            .onItemSelected(MovieContract.MovieEntry.buildMovieWithTrailersAndReviewsUri(cursor.getLong(COL_MOVIE_ID)));
                 }
 
 
