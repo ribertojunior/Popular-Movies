@@ -17,6 +17,7 @@ public class MovieContract {
     public static final String PATH_REVIEWS = "reviews";
     public static final String PATH_TRAILERS = "trailers";
 
+    // I need a column to store the movie position
     public static final class MovieEntry implements BaseColumns {
         public static final Uri CONTENT_URI =
                 BASE_CONTENT_URI.buildUpon().appendPath(PATH_MOVIES).build();

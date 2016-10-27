@@ -12,6 +12,7 @@ import android.content.SyncResult;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.casasw.popularmovies.BuildConfig;
@@ -31,11 +32,13 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Vector;
 
+import static com.casasw.popularmovies.Utilities.uriMaker;
+
 public class PopularMoviesSyncAdapter extends AbstractThreadedSyncAdapter {
     public final String LOG_TAG = PopularMoviesSyncAdapter.class.getSimpleName();
     // Interval at which to sync with the weather, in milliseconds.
     // 60 seconds (1 minute) * 180 = 3 hours
-    public static final int SYNC_INTERVAL = 30;//60*180;
+    public static final int SYNC_INTERVAL = 60*180;
     public static final int SYNC_FLEXTIME = SYNC_INTERVAL/3;
 
 
@@ -45,95 +48,126 @@ public class PopularMoviesSyncAdapter extends AbstractThreadedSyncAdapter {
 
     @Override
     public void onPerformSync(Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) {
-        Log.d(LOG_TAG, "onPerformSync Called.");
-
-        // These two need to be declared outside the try/catch
-        // so that they can be closed in the finally block.
-        HttpURLConnection urlConnection = null;
-        BufferedReader reader = null;
-
-        String moviesJsonStr = null;
+        //Log.d(LOG_TAG, "onPerformSync Called.");
         String movieList = Utilities.getMoviesList(getContext());
-        //Log.v(LOG_TAG, "Order by: " + movieList);
+        ////Log.v(LOG_TAG, "Order by: " + movieList);
         if (!movieList.equals(getContext().getString(R.string.pref_order_favorites_entry))) {
             try {
-
-                final String APIID_PARAM = "api_key";
-
-                Uri.Builder builder = new Uri.Builder();
+                String jsonStr = null;
+                //fetching movie data
+                String path[] = {"3", "movie", movieList};
+                URL url = new URL(uriMaker(
+                        "api.themoviedb.org", path, "api_key",
+                        BuildConfig.MovieDBApiKey).toString());
+                /*Uri.Builder builder = new Uri.Builder();
                 builder.scheme("http")
                         .authority("api.themoviedb.org")
                         .appendPath("3")
                         .appendPath("movie")
                         .appendPath(movieList)
-                        .appendQueryParameter(APIID_PARAM, BuildConfig.MovieDBApiKey);
-                URL url = new URL(builder.build().toString());
-                Log.v(LOG_TAG, "URL: "+url.toString());
-                urlConnection = (HttpURLConnection) url.openConnection();
-                urlConnection.setRequestMethod("GET");
-                urlConnection.connect();
-                InputStream inputStream = urlConnection.getInputStream();
-                StringBuffer buffer = new StringBuffer();
-                if (inputStream == null) {
-                    return;
-                }
-                reader = new BufferedReader(new InputStreamReader(inputStream));
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    // Since it's JSON, adding a newline isn't necessary (it won't affect parsing)
-                    // But it does make debugging a *lot* easier if you print out the completed
-                    // buffer for debugging.
-                    buffer.append(line + "\n");
+                        .appendQueryParameter(API_ID_PARAM, BuildConfig.MovieDBApiKey);
+                url = new URL(builder.build().toString());*/
+                //Log.v(LOG_TAG, "URL: "+url.toString());
+                final String[] PARAMS = {"results","poster_path","overview",
+                        "original_title","backdrop_path","vote_average",
+                        "release_date", "id"};
+                jsonStr = fetchJSonData(url);
+                String[] idList = insertMovieDataFromJson(jsonStr ,movieList, PARAMS);
+
+                String[] params;
+                String[] columns;
+                //trailers and reviews data
+                for (String movieId :
+                        idList) {
+                    path = new String[]{
+                        "3", "movie", movieId, "videos"
+                    } ;
+                    url = new URL(uriMaker(
+                            "api.themoviedb.org", path, "api_key",
+                            BuildConfig.MovieDBApiKey).toString());
+                    //Log.v(LOG_TAG, url.toString());
+                    jsonStr = fetchJSonData(url);
+                    params = new String[]{
+                            movieId, "key", "name", "site"
+                    };
+
+                    columns = new String[]{
+                            MovieContract.TrailersEntry.COLUMN_MOVIE_KEY,
+                            MovieContract.TrailersEntry.COLUMN_KEY,
+                            MovieContract.TrailersEntry.COLUMN_NAME,
+                            MovieContract.TrailersEntry.COLUMN_SITE
+                    };
+                    insertDataFromJson(jsonStr, params, columns, MovieContract.TrailersEntry.CONTENT_URI);
+
+                    path[3] = "reviews";
+                    url = new URL(uriMaker(
+                            "api.themoviedb.org", path, "api_key",
+                            BuildConfig.MovieDBApiKey).toString());
+                    //Log.v(LOG_TAG, url.toString());
+                    jsonStr = fetchJSonData(url);
+                    params = new String[]{
+                            movieId, "id", "author", "url"
+                    };
+
+                    columns = new String[]{
+                            MovieContract.ReviewsEntry.COLUMN_MOVIE_KEY,
+                            MovieContract.ReviewsEntry.COLUMN_REVIEW_ID,
+                            MovieContract.ReviewsEntry.COLUMN_AUTHOR,
+                            MovieContract.ReviewsEntry.COLUMN_URL
+                    };
+                    insertDataFromJson(jsonStr, params, columns, MovieContract.ReviewsEntry.CONTENT_URI);
+
                 }
 
-                if (buffer.length() == 0) {
-                    // Stream was empty.  No point in parsing.
-                    moviesJsonStr = null;
-                }
-                moviesJsonStr = buffer.toString();
 
 
             }catch (Exception e) {
                 Log.e(LOG_TAG, e.toString());
-                moviesJsonStr = null;
-            } finally {
-                if (urlConnection != null) {
-                    urlConnection.disconnect();
-                }
-                if (reader != null) {
-                    try {
-                        reader.close();
-                    } catch (final IOException e) {
-                        Log.e(LOG_TAG, "Error closing stream", e);
-                    }
-                }
-            }
-
-            try {
-                insertMoviesDataFromJson(moviesJsonStr, movieList);
-
-            }catch (JSONException e ){
-                Log.e(LOG_TAG, e.getMessage(), e);
-                e.printStackTrace();
             }
         }
 
     }
-    private void insertMoviesDataFromJson(String moviesJsonStr, String movieList)  throws JSONException{
 
-        final String[] PARAMS = {"results","poster_path","overview",
-                "original_title","backdrop_path","vote_average",
-                "release_date", "id"};
+    private void insertDataFromJson(String jsonStr, String[] params, String[] columns, Uri contentUri)  throws JSONException{
+        JSONObject jsonObject = new JSONObject(jsonStr);
+        JSONArray jsonArray = jsonObject.getJSONArray("results");
+        Vector<ContentValues> contentValuesVector = new Vector<ContentValues>(jsonArray.length());
 
-        //Log.v(LOG_TAG, "Original JSON: \n" + moviesJsonStr.toString());
+        //Log.v(LOG_TAG, "Inserting in "+contentUri);
+        JSONObject listJSON;
 
+        for (int i = 0; i< jsonArray.length(); i++) {
+            ContentValues movieValues = new ContentValues();
+            listJSON = jsonArray.getJSONObject(i);
+            //for this to work the columns ans params need to be align
+            movieValues.put(columns[0], params[0]);
+            for (int j = 1; j < columns.length; j++) {
+                movieValues.put(columns[j], listJSON.getString(params[j]));
+                if (i==1) {
+                    //Log.v(LOG_TAG, "insertDataFromJson: Inserting : "+listJSON.getString(params[j])+" in "+columns[j]);
+                }
+
+            }
+            contentValuesVector.add(movieValues);
+        }
+        int in = 0;
+        if (contentValuesVector.size() > 0) {
+            ContentValues[] cvArray = new ContentValues[contentValuesVector.size()];
+            contentValuesVector.toArray(cvArray);
+            in = getContext().getContentResolver().bulkInsert(contentUri, cvArray);
+            //Log.v(LOG_TAG, "insertDataFromJson: In: "+in);
+
+        }
+    }
+
+    private String[] insertMovieDataFromJson(String moviesJsonStr, String movieList, String[] params)  throws JSONException{
         JSONObject moviesJson = new JSONObject(moviesJsonStr);
-        JSONArray resultJsonArray = moviesJson.getJSONArray(PARAMS[0]);
+        JSONArray resultJsonArray = moviesJson.getJSONArray(params[0]);
         Vector<ContentValues> contentValuesVector = new Vector<ContentValues>(resultJsonArray.length());
 
-        //Log.v(LOG_TAG, "Result JSONArray: \n"+resultJsonArray.toString());
+        ////Log.v(LOG_TAG, "Result JSONArray: \n"+resultJsonArray.toString());
 
-        String[][] resultStr = new String[resultJsonArray.length()][PARAMS.length - 1];
+        String[] idList = new String[resultJsonArray.length()];
         JSONObject movieListJSON;
         for (int i = 0; i< resultJsonArray.length(); i++) {
             long id;
@@ -145,13 +179,15 @@ public class PopularMoviesSyncAdapter extends AbstractThreadedSyncAdapter {
             String release_date;
 
             movieListJSON = resultJsonArray.getJSONObject(i);
-            id = movieListJSON.getLong(PARAMS[7]);
-            poster_path = movieListJSON.getString(PARAMS[1]);
-            overview = movieListJSON.getString(PARAMS[2]);;
-            original_title = movieListJSON.getString(PARAMS[3]);;
-            backdrop_path = movieListJSON.getString(PARAMS[4]);;
-            vote_average = movieListJSON.getString(PARAMS[5]);;
-            release_date = movieListJSON.getString(PARAMS[6]);;
+            id = movieListJSON.getLong(params[7]);
+            poster_path = movieListJSON.getString(params[1]);
+            overview = movieListJSON.getString(params[2]);
+            original_title = movieListJSON.getString(params[3]);
+            backdrop_path = movieListJSON.getString(params[4]);
+            vote_average = movieListJSON.getString(params[5]);
+            release_date = movieListJSON.getString(params[6]);
+
+            idList[i] = movieListJSON.getString(params[7]);
 
             ContentValues movieValues = new ContentValues();
 
@@ -173,6 +209,60 @@ public class PopularMoviesSyncAdapter extends AbstractThreadedSyncAdapter {
             contentValuesVector.toArray(cvArray);
             in = getContext().getContentResolver().bulkInsert(MovieContract.MovieEntry.CONTENT_URI, cvArray);
         }
+        return idList;
+    }
+
+    @Nullable
+    private String fetchJSonData(URL url) {
+        HttpURLConnection urlConnection = null;
+        BufferedReader reader = null;
+
+        String jSonStr = null;
+
+        try {
+            ////Log.v(LOG_TAG, url.toString());
+            urlConnection = (HttpURLConnection) url.openConnection();
+            urlConnection.setRequestMethod("GET");
+            urlConnection.connect();
+            InputStream inputStream = urlConnection.getInputStream();
+            StringBuffer buffer = new StringBuffer();
+            if (inputStream == null) {
+                jSonStr = null;
+            }
+            reader = new BufferedReader(new InputStreamReader(inputStream));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                // Since it's JSON, adding a newline isn't necessary (it won't affect parsing)
+                // But it does make debugging a *lot* easier if you print out the completed
+                // buffer for debugging.
+                buffer.append(line + "\n");
+            }
+
+            if (buffer.length() == 0) {
+                // Stream was empty.  No point in parsing.
+                jSonStr = null;
+            }
+            jSonStr = buffer.toString();
+            return jSonStr;
+
+        }catch (Exception e){
+            Log.e(LOG_TAG, e.toString());
+            jSonStr = null;
+
+        }finally {
+            if (urlConnection != null){
+                urlConnection.disconnect();
+            }
+            if (reader != null){
+                try {
+                    reader.close();
+                } catch (final IOException e) {
+                    Log.e(LOG_TAG, "Error closing stream", e);
+                }
+            }
+
+        }
+        return null;
 
     }
 

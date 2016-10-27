@@ -9,6 +9,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import com.casasw.popularmovies.Utilities;
 
@@ -103,6 +104,7 @@ public class MovieProvider extends ContentProvider {
     private static final String sMovieIDSelection =
             MovieContract.MovieEntry.TABLE_NAME+
                     "." + MovieContract.MovieEntry.COLUMN_MOVIE_ID + " = ?";
+    private String LOG_TAG = MovieProvider.class.getSimpleName();
 
     private Cursor getFavoritesList(Uri uri, String[] projection, String sortOrder) {
 
@@ -151,19 +153,20 @@ public class MovieProvider extends ContentProvider {
         // 2) Use the addURI function to match each of the types.  Use the constants from
         // WeatherContract to help define the types to the UriMatcher.
         uriMatcher.addURI(MovieContract.CONTENT_AUTHORITY, MovieContract.PATH_MOVIES, MOVIE);
-        uriMatcher.addURI(MovieContract.CONTENT_AUTHORITY, MovieContract.PATH_MOVIES+"/*", MOVIE_ID);
+        uriMatcher.addURI(MovieContract.CONTENT_AUTHORITY, MovieContract.PATH_MOVIES+"/#", MOVIE_ID);
 
         uriMatcher.addURI(MovieContract.CONTENT_AUTHORITY,
                 MovieContract.PATH_MOVIES+"/"+
                         MovieContract.PATH_REVIEWS+"/"+
-                        MovieContract.PATH_TRAILERS+"/*", MOVIE_REVIEWS_TRAILER_ID);
+                        MovieContract.PATH_TRAILERS+"/#", MOVIE_REVIEWS_TRAILER_ID);
 
         uriMatcher.addURI(MovieContract.CONTENT_AUTHORITY, MovieContract.PATH_FAVORITES, FAVORITES);
-        uriMatcher.addURI(MovieContract.CONTENT_AUTHORITY, MovieContract.PATH_FAVORITES+"/*", FAVORITES_ID);
+        uriMatcher.addURI(MovieContract.CONTENT_AUTHORITY, MovieContract.PATH_FAVORITES+"/#", FAVORITES_ID);
         uriMatcher.addURI(MovieContract.CONTENT_AUTHORITY, MovieContract.PATH_FAVORITES, FAVORITES);
-        uriMatcher.addURI(MovieContract.CONTENT_AUTHORITY, MovieContract.PATH_REVIEWS+"/*", REVIEWS_ID);
+        uriMatcher.addURI(MovieContract.CONTENT_AUTHORITY, MovieContract.PATH_REVIEWS, REVIEWS);
+        uriMatcher.addURI(MovieContract.CONTENT_AUTHORITY, MovieContract.PATH_REVIEWS+"/#", REVIEWS_ID);
         uriMatcher.addURI(MovieContract.CONTENT_AUTHORITY, MovieContract.PATH_TRAILERS, TRAILERS);
-        uriMatcher.addURI(MovieContract.CONTENT_AUTHORITY, MovieContract.PATH_TRAILERS+"/*", TRAILERS_ID);
+        uriMatcher.addURI(MovieContract.CONTENT_AUTHORITY, MovieContract.PATH_TRAILERS+"/#", TRAILERS_ID);
 
         // 3) Return the new matcher!
         return uriMatcher;
@@ -308,7 +311,7 @@ public class MovieProvider extends ContentProvider {
             }
             case REVIEWS: {
                 ContentValues reviewsCV = new ContentValues();
-                reviewsCV.put(MovieContract.ReviewsEntry._ID, (String) contentValues.get(MovieContract.ReviewsEntry._ID));
+                reviewsCV.put(MovieContract.ReviewsEntry.COLUMN_REVIEW_ID, (String) contentValues.get(MovieContract.ReviewsEntry.COLUMN_REVIEW_ID));
                 reviewsCV.put(MovieContract.ReviewsEntry.COLUMN_MOVIE_KEY, (String) contentValues.get(MovieContract.ReviewsEntry.COLUMN_MOVIE_KEY));
                 reviewsCV.put(COLUMN_AUTHOR, (String) contentValues.get(COLUMN_AUTHOR));
                 reviewsCV.put(COLUMN_URL, (String) contentValues.get(COLUMN_URL));
@@ -322,7 +325,6 @@ public class MovieProvider extends ContentProvider {
             }
             case TRAILERS: {
                 ContentValues trailersCV = new ContentValues();
-                trailersCV.put(MovieContract.TrailersEntry._ID, (String) contentValues.get(MovieContract.TrailersEntry._ID));
                 trailersCV.put(MovieContract.TrailersEntry.COLUMN_MOVIE_KEY, (String) contentValues.get(MovieContract.TrailersEntry.COLUMN_MOVIE_KEY));
                 trailersCV.put(MovieContract.TrailersEntry.COLUMN_KEY, (String) contentValues.get(MovieContract.TrailersEntry.COLUMN_KEY));
                 trailersCV.put(MovieContract.TrailersEntry.COLUMN_NAME, (String) contentValues.get(MovieContract.TrailersEntry.COLUMN_NAME));
@@ -410,6 +412,8 @@ public class MovieProvider extends ContentProvider {
     @Override
     public int bulkInsert(Uri uri, ContentValues[] values) {
         final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+        Log.v(LOG_TAG, "bulkInsert: Database size: "+getContext().getDatabasePath(mOpenHelper.getDatabaseName()).length()+" bytes.");
+
         final int match = sUriMatcher.match(uri);
         switch (match) {
             case MOVIE: {
