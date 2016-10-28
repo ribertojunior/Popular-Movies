@@ -103,7 +103,7 @@ public class FetchTrailersTask extends AsyncTask<String, Void, ArrayList<String[
                     itemView = mInflater.inflate(R.layout.view_items, null);
                     imageView = (ImageView) itemView.findViewById(R.id.imageViewPlay);
                     textView = (TextView) itemView.findViewById(R.id.textViewTrailer);
-                    textView.setText(textView.getText()+" "+strings[i][1]);
+                    textView.setText(mContext.getString(R.string.play_trailer)+" "+strings[i][1]);
                     //Log.v(LOG_TAG, strings[i][j]);
                     final int pos = i;
                     imageView.setOnClickListener(new View.OnClickListener() {

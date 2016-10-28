@@ -88,11 +88,12 @@ public class PopularMoviesSyncAdapter extends AbstractThreadedSyncAdapter {
                     //Log.v(LOG_TAG, url.toString());
                     jsonStr = fetchJSonData(url);
                     params = new String[]{
-                            movieId, "key", "name", "site"
+                            movieId, "id", "key", "name", "site"
                     };
 
                     columns = new String[]{
                             MovieContract.TrailersEntry.COLUMN_MOVIE_KEY,
+                            MovieContract.TrailersEntry.COLUMN_TRAILER_ID,
                             MovieContract.TrailersEntry.COLUMN_KEY,
                             MovieContract.TrailersEntry.COLUMN_NAME,
                             MovieContract.TrailersEntry.COLUMN_SITE
@@ -199,6 +200,7 @@ public class PopularMoviesSyncAdapter extends AbstractThreadedSyncAdapter {
             movieValues.put(MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE, vote_average);
             movieValues.put(MovieContract.MovieEntry.COLUMN_RELEASE_DATE, release_date);
             movieValues.put(MovieContract.MovieEntry.COLUMN_MOVIE_LIST, movieList);
+            movieValues.put(MovieContract.MovieEntry.COLUMN_POSITION, i);
 
             contentValuesVector.add(movieValues);
 

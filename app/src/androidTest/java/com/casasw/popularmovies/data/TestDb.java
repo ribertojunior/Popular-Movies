@@ -98,6 +98,7 @@ public class TestDb extends AndroidTestCase {
         movieColumnHashSet.add(MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE);
         movieColumnHashSet.add(MovieContract.MovieEntry.COLUMN_RELEASE_DATE);
         movieColumnHashSet.add(MovieContract.MovieEntry.COLUMN_MOVIE_LIST);
+        movieColumnHashSet.add(MovieContract.MovieEntry.COLUMN_POSITION);
 
         int columnNameIndex = c.getColumnIndex("name");
         do {
@@ -112,32 +113,10 @@ public class TestDb extends AndroidTestCase {
         db.close();
     }
 
-    /*
-        Students:  Here is where you will build code to test that we can insert and query the
-        location database.  We've done a lot of work for you.  You'll want to look in TestUtilities
-        where you can uncomment out the "createFavoriteValues" function.  You can
-        also make use of the ValidateCurrentRecord function from within TestUtilities.
-    */
-    public void testInserts() {
-        long in = insertFavorite();
-        assertTrue("Error: Insertion in location table has fail.", in != -1 );
 
-    }
 
-    /*
-        Students:  Here is where you will build code to test that we can insert and query the
-        database.  We've done a lot of work for you.  You'll want to look in TestUtilities
-        where you can use the "createMoviesValues" function.  You can
-        also make use of the validateCurrentRecord function from within TestUtilities.
-     */
     public void testMovieTable() {
-        // First insert the location, and then use the locationRowId to insert
-        // the weather. Make sure to cover as many failure cases as you can.
-        //long locationRowId = insertFavorite();
-        // Instead of rewriting all of the code we've already written in testInserts
-        // we can move this code to insertFavorite and then call insertFavorite from both
-        // tests. Why move it? We need the code to return the ID of the inserted location
-        // and our testInserts can only return void because it's a test.
+
 
         // First step: Get reference to writable database
         SQLiteDatabase db = new MovieDbHelper(
@@ -157,6 +136,15 @@ public class TestDb extends AndroidTestCase {
         // (you can use the validateCurrentRecord function in TestUtilities to validate the
         // query if you like)
         com.casasw.popularmovies.data.TestUtilities.validateCurrentRecord("Error: The returning cursor is not equals to ContentValues inserted.", c, cv);
+        //testing the unique clause
+        in = db.insert(MovieContract.MovieEntry.TABLE_NAME,null, cv);
+        assertTrue("Error: Insertion in movie table has fail.", in != -1 );
+        // Query the database and receive a Cursor back
+        c = db.query(MovieContract.MovieEntry.TABLE_NAME, null, null, null, null, null, null);
+        // Move the cursor to a valid database row
+        assertTrue("Error: Weather table select has fail.",
+                c.moveToFirst());
+        assertTrue("Error: Unique clause is not working properly. We got ["+c.getCount()+"] rows.", c.getCount()==1);
         // Finally, close the cursor and database
         c.close();
         db.close();
@@ -167,6 +155,7 @@ public class TestDb extends AndroidTestCase {
                 this.mContext).getWritableDatabase();
 
         ContentValues cv = new ContentValues();
+        cv.put(MovieContract.ReviewsEntry.COLUMN_REVIEW_ID, "10012");
         cv.put(MovieContract.ReviewsEntry.COLUMN_MOVIE_KEY, "1001");
         cv.put(MovieContract.ReviewsEntry.COLUMN_AUTHOR, "Meuzovo da Silva Sauro");
         cv.put(MovieContract.ReviewsEntry.COLUMN_URL, "www.example.com/1001");
@@ -183,6 +172,15 @@ public class TestDb extends AndroidTestCase {
         // (you can use the validateCurrentRecord function in TestUtilities to validate the
         // query if you like)
         com.casasw.popularmovies.data.TestUtilities.validateCurrentRecord("Error: The returning cursor is not equals to ContentValues inserted.", c, cv);
+        //testing conflict
+        in = db.insert(MovieContract.ReviewsEntry.TABLE_NAME,null, cv);
+        assertTrue("Error: Insertion in table has fail.", in != -1 );
+        c = db.query(MovieContract.ReviewsEntry.TABLE_NAME, null, null, null, null, null, null);
+        // Move the cursor to a valid database row
+        assertTrue("Error: Weather table select has fail.",
+                c.moveToFirst());
+
+        assertEquals("Error: unique clause is not working properly. We have ["+c.getCount()+"] rows", 1, c.getCount());
         // Finally, close the cursor and database
         c.close();
         db.close();
@@ -288,6 +286,7 @@ public class TestDb extends AndroidTestCase {
                 this.mContext).getWritableDatabase();
 
         ContentValues cv = new ContentValues();
+        cv.put(MovieContract.TrailersEntry.COLUMN_TRAILER_ID, "10012");
         cv.put(MovieContract.TrailersEntry.COLUMN_MOVIE_KEY, "1001");
         cv.put(MovieContract.TrailersEntry.COLUMN_KEY, "vfgsd5");
         cv.put(MovieContract.TrailersEntry.COLUMN_NAME, "Meuzovo");
@@ -305,6 +304,12 @@ public class TestDb extends AndroidTestCase {
         // (you can use the validateCurrentRecord function in TestUtilities to validate the
         // query if you like)
         com.casasw.popularmovies.data.TestUtilities.validateCurrentRecord("Error: The returning cursor is not equals to ContentValues inserted.", c, cv);
+        //testing the unique clause
+        in = db.insert(MovieContract.TrailersEntry.TABLE_NAME,null, cv);
+        assertTrue("Error: Insertion in movie table has fail.", in != -1 );
+        // Query the database and receive a Cursor back
+        c = db.query(MovieContract.TrailersEntry.TABLE_NAME, null, null, null, null, null, null);
+        assertTrue("Error: Unique clause is not working properly. We got ["+c.getCount()+"] rows", c.getCount()==1);
         // Finally, close the cursor and database
         c.close();
         db.close();
@@ -313,10 +318,10 @@ public class TestDb extends AndroidTestCase {
 
     /*
         Students: This is a helper method for the testMovieTable quiz. You can move your
-        code from testInserts to here so that you can call this code from both
-        testMovieTable and testInserts.
+        code from testFavoritesTable to here so that you can call this code from both
+        testMovieTable and testFavoritesTable.
      */
-    public long insertFavorite() {
+    public void testFavoritesTable() {
         String testMovieKey = "010101";
         String testOriginalTitle = "Meuzovo. De novo!";
         // First step: Get reference to writable database
@@ -332,7 +337,7 @@ public class TestDb extends AndroidTestCase {
 
         // Insert ContentValues into database and get a row ID back
         long in = db.insert(MovieContract.FavoritesEntry.TABLE_NAME,null, cv);
-        assertTrue("Error: Insertion in location table has fail.", in != -1 );
+        assertTrue("Error: Unique clause is not working properly.", in != -1 );
         // Query the database and receive a Cursor back
         //Cursor c = db.rawQuery("SELECT * FROM " + WeatherContract.LocationEntry.TABLE_NAME, null);
         Cursor c = db.query(MovieContract.FavoritesEntry.TABLE_NAME, null, null, null, null, null, null);
@@ -343,8 +348,12 @@ public class TestDb extends AndroidTestCase {
 
         // Validate data in resulting Cursor with the original ContentValues
         com.casasw.popularmovies.data.TestUtilities.validateCurrentRecord("Error: The returning cursor is not equals to ContentValues inserted.", c, cv);
-        // (you can use the validateCurrentRecord function in TestUtilities to validate the
-        // query if you like)
+
+        //testing unique clause
+        in = db.insert(MovieContract.FavoritesEntry.TABLE_NAME,null, cv);
+        assertTrue("Error: Insertion in location table has fail.", in == -1 );
+
+
         assertFalse( "Error: More than one record returned from location query",
                 c.moveToNext() );
 
@@ -352,7 +361,6 @@ public class TestDb extends AndroidTestCase {
         c.close();
         db.close();
 
-        return in;
     }
 
 

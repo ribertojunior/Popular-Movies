@@ -9,12 +9,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.support.annotation.Nullable;
-import android.util.Log;
 
 import com.casasw.popularmovies.Utilities;
-
-import static com.casasw.popularmovies.data.MovieContract.ReviewsEntry.COLUMN_AUTHOR;
-import static com.casasw.popularmovies.data.MovieContract.ReviewsEntry.COLUMN_URL;
 
 
 public class MovieProvider extends ContentProvider {
@@ -136,7 +132,9 @@ public class MovieProvider extends ContentProvider {
     }
 
     private Cursor getMovieReviewsTrailers (Uri uri, String[] projection, String sortOrder) {
-        String[] selectionArgs = new String[]{MovieContract.MovieEntry.getMovieIDFromUri(uri), MovieContract.MovieEntry.getMovieIDFromUri(uri)};
+        String[] selectionArgs = new String[]{MovieContract.MovieEntry.getMovieIDFromUri(uri),
+                MovieContract.MovieEntry.getMovieIDFromUri(uri),
+                MovieContract.MovieEntry.getMovieIDFromUri(uri)};
         return sMovieReviewsTrailerQueryBuilder.query(mOpenHelper.getReadableDatabase(),
                 projection,
                 sMovieReviewsTrailersSelection,
@@ -310,12 +308,12 @@ public class MovieProvider extends ContentProvider {
                 break;
             }
             case REVIEWS: {
-                ContentValues reviewsCV = new ContentValues();
+                /*ContentValues reviewsCV = new ContentValues();
                 reviewsCV.put(MovieContract.ReviewsEntry.COLUMN_REVIEW_ID, (String) contentValues.get(MovieContract.ReviewsEntry.COLUMN_REVIEW_ID));
                 reviewsCV.put(MovieContract.ReviewsEntry.COLUMN_MOVIE_KEY, (String) contentValues.get(MovieContract.ReviewsEntry.COLUMN_MOVIE_KEY));
                 reviewsCV.put(COLUMN_AUTHOR, (String) contentValues.get(COLUMN_AUTHOR));
-                reviewsCV.put(COLUMN_URL, (String) contentValues.get(COLUMN_URL));
-                long _id = db.insert(MovieContract.ReviewsEntry.TABLE_NAME, null, reviewsCV);
+                reviewsCV.put(COLUMN_URL, (String) contentValues.get(COLUMN_URL));*/
+                long _id = db.insert(MovieContract.ReviewsEntry.TABLE_NAME, null, contentValues);
                 if (_id > 0) {
                     returnUri = MovieContract.ReviewsEntry.buildReviewsUri(_id);
                 }
@@ -324,12 +322,13 @@ public class MovieProvider extends ContentProvider {
                 break;                
             }
             case TRAILERS: {
-                ContentValues trailersCV = new ContentValues();
+                /*ContentValues trailersCV = new ContentValues();
                 trailersCV.put(MovieContract.TrailersEntry.COLUMN_MOVIE_KEY, (String) contentValues.get(MovieContract.TrailersEntry.COLUMN_MOVIE_KEY));
+                trailersCV.put(MovieContract.TrailersEntry.COLUMN_TRAILER_ID, (String) contentValues.get(MovieContract.TrailersEntry.COLUMN_TRAILER_ID));
                 trailersCV.put(MovieContract.TrailersEntry.COLUMN_KEY, (String) contentValues.get(MovieContract.TrailersEntry.COLUMN_KEY));
                 trailersCV.put(MovieContract.TrailersEntry.COLUMN_NAME, (String) contentValues.get(MovieContract.TrailersEntry.COLUMN_NAME));
-                trailersCV.put(MovieContract.TrailersEntry.COLUMN_SITE, (String) contentValues.get(MovieContract.TrailersEntry.COLUMN_SITE));
-                long _id = db.insert(MovieContract.TrailersEntry.TABLE_NAME, null, trailersCV);
+                trailersCV.put(MovieContract.TrailersEntry.COLUMN_SITE, (String) contentValues.get(MovieContract.TrailersEntry.COLUMN_SITE));*/
+                long _id = db.insert(MovieContract.TrailersEntry.TABLE_NAME, null, contentValues);
                 if (_id > 0) {
                     returnUri = MovieContract.TrailersEntry.buildTrailersUri(_id);
                 }
@@ -412,7 +411,7 @@ public class MovieProvider extends ContentProvider {
     @Override
     public int bulkInsert(Uri uri, ContentValues[] values) {
         final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
-        Log.v(LOG_TAG, "bulkInsert: Database size: "+getContext().getDatabasePath(mOpenHelper.getDatabaseName()).length()+" bytes.");
+        //Log.v(LOG_TAG, "bulkInsert: Database size: "+getContext().getDatabasePath(mOpenHelper.getDatabaseName()).length()+" bytes.");
 
         final int match = sUriMatcher.match(uri);
         switch (match) {

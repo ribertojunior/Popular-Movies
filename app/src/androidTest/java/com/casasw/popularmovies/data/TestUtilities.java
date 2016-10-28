@@ -106,6 +106,7 @@ public class TestUtilities extends AndroidTestCase {
         values.put(MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE, "6.969");
         values.put(MovieContract.MovieEntry.COLUMN_RELEASE_DATE, "6/9/69");
         values.put(MovieContract.MovieEntry.COLUMN_MOVIE_LIST, "popular");
+        values.put(MovieContract.MovieEntry.COLUMN_POSITION, "1");
 
         return values;
     }

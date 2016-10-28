@@ -38,6 +38,7 @@ public class MovieContract {
         public static final String COLUMN_VOTE_AVERAGE = "vote_average";
         public static final String COLUMN_RELEASE_DATE = "release_date";
         public static final String COLUMN_MOVIE_LIST = "movie_list";
+        public static final String COLUMN_POSITION = "position";
 
         public static Uri buildMovieUri(long id) {
             return ContentUris.withAppendedId(CONTENT_URI, id);
@@ -122,6 +123,8 @@ public class MovieContract {
         public static final String TABLE_NAME = "trailers";
 
         public static final String COLUMN_MOVIE_KEY = "movie_id";
+
+        public static final String COLUMN_TRAILER_ID = "trailer_id";
 
         public static final String COLUMN_KEY = "key";
 

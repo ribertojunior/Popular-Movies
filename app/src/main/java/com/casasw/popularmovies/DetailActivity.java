@@ -14,6 +14,7 @@ public class DetailActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+
         if (savedInstanceState == null) {
             Bundle args = new Bundle();
             args.putParcelable(DetailFragment.DETAIL_URI, getIntent().getData());

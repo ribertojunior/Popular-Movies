@@ -8,6 +8,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +18,8 @@ import android.widget.TextView;
 
 import com.casasw.popularmovies.data.MovieContract;
 import com.squareup.picasso.Picasso;
+
+import java.util.HashMap;
 
 import static com.casasw.popularmovies.R.id.imageView;
 import static com.casasw.popularmovies.Utilities.uriMaker;
@@ -44,23 +47,22 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             MovieContract.ReviewsEntry.COLUMN_URL,
             MovieContract.TrailersEntry.COLUMN_SITE,
             MovieContract.TrailersEntry.COLUMN_NAME,
-            MovieContract.TrailersEntry.COLUMN_KEY,
+            MovieContract.TrailersEntry.COLUMN_KEY
 
     };
-    static final int COL_ID = 0;
-    static final int COL_MOVIE_ID = 1;
-    static final int COL_ORIGINAL_TITLE = 2;
-    static final int COL_RELEASE_DATE = 3;
-    static final int COL_POSTER_PATH = 4;
-    static final int COL_OVERVIEW = 5;
-    static final int COL_VOTE_AVARAGE = 6;
-    static final int COL_BACKDROP_PATH = 7;
-    static final int COL_MOVIE_LIST = 8;
-    static final int COL_REVIEW_AUTHOR = 9;
-    static final int COL_REVIEW_URL = 10;
-    static final int COL_TRAILER_SITE = 11;
-    static final int COL_TRAILER_NAME = 12;
-    static final int COL_TRAILER_KEY = 13;
+    static final int COL_MOVIE_ID = 0;
+    static final int COL_ORIGINAL_TITLE = 1;
+    static final int COL_RELEASE_DATE = 2;
+    static final int COL_POSTER_PATH = 3;
+    static final int COL_OVERVIEW = 4;
+    static final int COL_VOTE_AVERAGE = 5;
+    static final int COL_BACKDROP_PATH = 6;
+    static final int COL_MOVIE_LIST = 7;
+    static final int COL_REVIEW_AUTHOR = 8;
+    static final int COL_REVIEW_URL = 9;
+    static final int COL_TRAILER_SITE = 10;
+    static final int COL_TRAILER_NAME = 11;
+    static final int COL_TRAILER_KEY = 12;
 
 
     public DetailFragment() {
@@ -119,9 +121,45 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                             data.getString(COL_BACKDROP_PATH).substring(1),
                             "w342")).into(viewHolder.mBackdrop);
 
-            viewHolder.mVoteAvg.setText(data.getString(COL_VOTE_AVARAGE));
+            viewHolder.mVoteAvg.setText(data.getString(COL_VOTE_AVERAGE));
             viewHolder.mDate.setText(data.getString(COL_RELEASE_DATE));
             viewHolder.mStar.setImageResource(android.R.drawable.btn_star_big_off);
+            Log.v(LOG_TAG, "onLoadFinished: Raw data");
+            View item;
+            TextView textView;
+            ImageView reviewImage;
+            HashMap<String, String> unique = new HashMap<>();
+            do {
+               /*Log.v(LOG_TAG, "onLoadFinished: ---------------");
+
+                Log.v(LOG_TAG, "onLoadFinished: Trailer data: "+
+                        data.getString(COL_TRAILER_NAME)+" "+
+                        data.getString(COL_TRAILER_SITE)+" "+
+                        data.getString(COL_TRAILER_KEY));
+                Log.v(LOG_TAG, "onLoadFinished: Review data: "+
+                        data.getString(COL_REVIEW_AUTHOR)+" "+
+                        data.getString(COL_REVIEW_URL));*/
+                if (!unique.containsValue(data.getString(COL_TRAILER_NAME))) {
+                    unique.put(data.getString(COL_TRAILER_NAME), data.getString(COL_TRAILER_NAME));
+                    item = LayoutInflater.from(getActivity()).inflate(R.layout.view_items, null);
+                    textView = (TextView) item.findViewById(R.id.textViewTrailer);
+                    textView.setText(" "+getString(R.string.play_trailer)+" "+data.getString(COL_TRAILER_NAME));
+                    viewHolder.mTrailer.addView(item);
+                }
+
+                if (!unique.containsValue(data.getString(COL_REVIEW_URL))) {
+                    unique.put(data.getString(COL_REVIEW_URL),data.getString(COL_REVIEW_URL));
+                    item = LayoutInflater.from(getActivity()).inflate(R.layout.view_items, null);
+                    reviewImage = (ImageView) item.findViewById(R.id.imageViewPlay);
+                    reviewImage.setImageResource(R.drawable.text);
+                    textView = (TextView) item.findViewById(R.id.textViewTrailer);
+                    textView.setText(getString(R.string.read_pre)+" "+data.getString(COL_REVIEW_AUTHOR)+ getString(R.string.read_pos));
+                    viewHolder.mReview.addView(item);
+                }
+
+
+            } while (data.moveToNext());
+
             /*
             Testar se filmes está na tabela de favoritos, se sim mudar para star_nig_on
             implementar o clicklistener para adicionar/remover o filme dos favoritos
@@ -149,15 +187,18 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         public final LinearLayout mTrailer;
         public final LinearLayout mReview;
 
+
         public ViewHolder(View view) {
             mTitle = (TextView) view.findViewById(R.id.movieTitleText);
             mBackdrop = (ImageView) view.findViewById(imageView);
             mVoteAvg = (TextView) view.findViewById(R.id.voteAvgText);
             mDate = (TextView) view.findViewById(R.id.dateText);
             mStar = (ImageView) view.findViewById(R.id.imageViewStar);
+
             mOverview = (TextView) view.findViewById(R.id.overviewText);
             mTrailer = (LinearLayout) view.findViewById(R.id.viewTrailer);
             mReview = (LinearLayout) view.findViewById(R.id.viewReview);
+
 
         }
     }

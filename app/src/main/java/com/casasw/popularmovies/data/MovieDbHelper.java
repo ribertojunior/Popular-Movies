@@ -30,14 +30,16 @@ public class MovieDbHelper extends SQLiteOpenHelper {
                 MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE + " INTEGER NOT NULL, "+
                 MovieContract.MovieEntry.COLUMN_RELEASE_DATE + " TEXT NOT NULL, "+
                 MovieContract.MovieEntry.COLUMN_MOVIE_LIST + " TEXT NOT NULL, " +
+                MovieContract.MovieEntry.COLUMN_POSITION + " INTEGER NOT NULL, " +
 
-                "UNIQUE ("+ MovieContract.MovieEntry.COLUMN_MOVIE_ID+") ON CONFLICT REPLACE)";
+                "UNIQUE ("+ MovieContract.MovieEntry.COLUMN_MOVIE_LIST+", "+
+                MovieContract.MovieEntry.COLUMN_POSITION +") ON CONFLICT REPLACE)";
 
         sqLiteDatabase.execSQL(SQL_DATABASE_MOVIE_TABLE);
 
         final String SQL_CREATE_FAVORITES_TABLE = "CREATE TABLE " + MovieContract.FavoritesEntry.TABLE_NAME + " (" +
                 MovieContract.FavoritesEntry._ID + "INTEGER PRIMARY KEY,"+
-                MovieContract.FavoritesEntry.COLUMN_MOVIE_KEY + " INTEGER NOT NULL," +
+                MovieContract.FavoritesEntry.COLUMN_MOVIE_KEY + " INTEGER UNIQUE NOT NULL," +
                 MovieContract.FavoritesEntry.COLUMN_ORIGINAL_TITLE + " TEXT NOT NULL, " +
                 "FOREIGN KEY (" + MovieContract.FavoritesEntry.COLUMN_MOVIE_KEY + ") REFERENCES "+
                 MovieContract.MovieEntry.TABLE_NAME + " (" + MovieContract.MovieEntry.COLUMN_MOVIE_ID + "));";
@@ -51,18 +53,23 @@ public class MovieDbHelper extends SQLiteOpenHelper {
                 MovieContract.ReviewsEntry.COLUMN_AUTHOR + " TEXT NOT NULL, " +
                 MovieContract.ReviewsEntry.COLUMN_URL + " TEXT NOT NULL, " +
                 "FOREIGN KEY (" + MovieContract.ReviewsEntry.COLUMN_MOVIE_KEY + ") REFERENCES "+
-                MovieContract.MovieEntry.TABLE_NAME + " (" + MovieContract.MovieEntry.COLUMN_MOVIE_ID + "));";
+                MovieContract.MovieEntry.TABLE_NAME + " (" + MovieContract.MovieEntry.COLUMN_MOVIE_ID + "), "+
+                "UNIQUE ("+ MovieContract.ReviewsEntry.COLUMN_REVIEW_ID+", "+
+                MovieContract.ReviewsEntry.COLUMN_MOVIE_KEY+") ON CONFLICT REPLACE);";
 
         sqLiteDatabase.execSQL(SQL_CREATE_REVIEWS_TABLE);
 
         final String SQL_CREATE_TRAILERS_TABLE = "CREATE TABLE " + MovieContract.TrailersEntry.TABLE_NAME + " (" +
                 MovieContract.TrailersEntry._ID + " INTEGER PRIMARY KEY," +
+                MovieContract.TrailersEntry.COLUMN_TRAILER_ID+ " TEXT NOT NULL," +
                 MovieContract.TrailersEntry.COLUMN_MOVIE_KEY+ " TEXT NOT NULL," +
                 MovieContract.TrailersEntry.COLUMN_KEY + " TEXT NOT NULL, " +
                 MovieContract.TrailersEntry.COLUMN_NAME + " TEXT NOT NULL, " +
                 MovieContract.TrailersEntry.COLUMN_SITE + " TEXT NOT NULL, " +
                 "FOREIGN KEY (" + MovieContract.TrailersEntry.COLUMN_MOVIE_KEY + ") REFERENCES "+
-                MovieContract.MovieEntry.TABLE_NAME + " (" + MovieContract.MovieEntry.COLUMN_MOVIE_ID + "));";
+                MovieContract.MovieEntry.TABLE_NAME + " (" + MovieContract.MovieEntry.COLUMN_MOVIE_ID + "), "+
+                "UNIQUE ("+ MovieContract.TrailersEntry.COLUMN_TRAILER_ID+", "+
+                MovieContract.TrailersEntry.COLUMN_MOVIE_KEY+") ON CONFLICT REPLACE);";
 
         sqLiteDatabase.execSQL(SQL_CREATE_TRAILERS_TABLE);
 

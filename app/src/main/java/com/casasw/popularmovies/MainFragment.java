@@ -12,7 +12,6 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -39,7 +38,8 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
             MovieContract.MovieEntry.COLUMN_OVERVIEW,
             MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE,
             MovieContract.MovieEntry.COLUMN_BACKDROP_PATH,
-            MovieContract.MovieEntry.COLUMN_MOVIE_LIST
+            MovieContract.MovieEntry.COLUMN_MOVIE_LIST,
+            MovieContract.MovieEntry.COLUMN_POSITION
     };
     static final int COL_ID = 0;
     static final int COL_MOVIE_ID = 1;
@@ -50,6 +50,8 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
     static final int COL_VOTE_AVARAGE = 6;
     static final int COL_BACKDROP_PATH = 7;
     static final int COL_MOVIE_LIST = 8;
+    static final int COL_POSITION = 9;
+
     private String mList;
 
 
@@ -148,16 +150,18 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         String movieList = Utilities.getMoviesList(getActivity());
         Uri movieListUri = MovieContract.MovieEntry.CONTENT_URI;
+        String sortOrder = MovieContract.MovieEntry.COLUMN_POSITION + " ASC";
         if (movieList.equals(getString(R.string.pref_order_favorites_entry))) {
             movieListUri = MovieContract.FavoritesEntry.CONTENT_URI;
+            sortOrder = MovieContract.FavoritesEntry._ID + " ASC";
         }
-        return new CursorLoader(getActivity(), movieListUri, MOVIE_COLUMNS, null, null, null);
+        return new CursorLoader(getActivity(), movieListUri, MOVIE_COLUMNS, null, null, sortOrder);
     }
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        Log.v(LOG_TAG, "onLoadFinished: data "+data.moveToFirst()+" - "
-                + data.getColumnCount()+" - " + data.getCount());
+       /* Log.v(LOG_TAG, "onLoadFinished: data "+data.moveToFirst()+" - "
+                + data.getColumnCount()+" - " + data.getCount());*/
 
         mMovieAdapter.swapCursor(data);
 
