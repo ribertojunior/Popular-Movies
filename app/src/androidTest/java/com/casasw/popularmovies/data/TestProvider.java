@@ -231,7 +231,7 @@ public class TestProvider extends AndroidTestCase {
         long row = db.insert(MovieEntry.TABLE_NAME, null, values);
 
         ContentValues testValues = new ContentValues();
-        testValues.put(MovieContract.FavoritesEntry.COLUMN_MOVIE_KEY,
+        testValues.put(MovieContract.FavoritesEntry.COLUMN_MOVIE_ID,
                 (Long)values.get(MovieContract.MovieEntry._ID));
         testValues.put(MovieContract.FavoritesEntry.COLUMN_ORIGINAL_TITLE,
                 (String) values.get(MovieContract.MovieEntry.COLUMN_ORIGINAL_TITLE));
@@ -348,7 +348,7 @@ public class TestProvider extends AndroidTestCase {
                 movieCursor, movieValues);
 
         ContentValues testValues = new ContentValues();
-        testValues.put(MovieContract.FavoritesEntry.COLUMN_MOVIE_KEY,(Long) movieValues.get(MovieContract.MovieEntry._ID));
+        testValues.put(MovieContract.FavoritesEntry.COLUMN_MOVIE_ID,(Long) movieValues.get(MovieContract.MovieEntry._ID));
         testValues.put(MovieContract.FavoritesEntry.COLUMN_ORIGINAL_TITLE,(String) movieValues.get(MovieContract.MovieEntry.COLUMN_ORIGINAL_TITLE));
 
         // Register a content observer for our insert.  This time, directly with the content resolver

@@ -1,5 +1,6 @@
 package com.casasw.popularmovies;
 
+import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -88,7 +89,6 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             if (list.equals(getString(R.string.pref_order_favorites_entry))){
                 mUri = MovieContract.FavoritesEntry.CONTENT_URI;
             }
-
             getLoaderManager().restartLoader(LOADER_ID, null, this);
         }
     }
@@ -122,12 +122,12 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                             "w342")).into(viewHolder.mBackdrop);
 
             viewHolder.mVoteAvg.setText(data.getString(COL_VOTE_AVERAGE));
-            viewHolder.mDate.setText(data.getString(COL_RELEASE_DATE));
+            viewHolder.mDate.setText("("+data.getString(COL_RELEASE_DATE).substring(0,4)+")");
             viewHolder.mStar.setImageResource(android.R.drawable.btn_star_big_off);
             Log.v(LOG_TAG, "onLoadFinished: Raw data");
             View item;
             TextView textView;
-            ImageView reviewImage;
+            ImageView auxImage;
             HashMap<String, String> unique = new HashMap<>();
             do {
                /*Log.v(LOG_TAG, "onLoadFinished: ---------------");
@@ -139,22 +139,44 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                 Log.v(LOG_TAG, "onLoadFinished: Review data: "+
                         data.getString(COL_REVIEW_AUTHOR)+" "+
                         data.getString(COL_REVIEW_URL));*/
-                if (!unique.containsValue(data.getString(COL_TRAILER_NAME))) {
-                    unique.put(data.getString(COL_TRAILER_NAME), data.getString(COL_TRAILER_NAME));
-                    item = LayoutInflater.from(getActivity()).inflate(R.layout.view_items, null);
-                    textView = (TextView) item.findViewById(R.id.textViewTrailer);
-                    textView.setText(" "+getString(R.string.play_trailer)+" "+data.getString(COL_TRAILER_NAME));
-                    viewHolder.mTrailer.addView(item);
+                if (data.getColumnIndex(MovieContract.TrailersEntry.COLUMN_NAME) != -1) {
+                    if (!unique.containsValue(data.getString(data.getColumnIndex(MovieContract.TrailersEntry.COLUMN_NAME)))) {
+                        unique.put(data.getString(data.getColumnIndex(MovieContract.TrailersEntry.COLUMN_NAME)), data.getString(data.getColumnIndex(MovieContract.TrailersEntry.COLUMN_NAME)));
+                        item = LayoutInflater.from(getActivity()).inflate(R.layout.view_items, null);
+                        auxImage = (ImageView) item.findViewById(R.id.imageViewPlay);
+                        final String key = data.getString(data.getColumnIndex(MovieContract.TrailersEntry.COLUMN_KEY));
+                        auxImage.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                String[] path = {"watch"};
+                                Intent intent = new Intent(Intent.ACTION_VIEW, Utilities.uriMaker("www.youtube.com", path, "v",key));
+                                startActivity(intent);
+                            }
+                        });
+                        textView = (TextView) item.findViewById(R.id.textViewTrailer);
+                        textView.setText(" "+getString(R.string.play_trailer)+" "+data.getString(data.getColumnIndex(MovieContract.TrailersEntry.COLUMN_NAME)));
+                        viewHolder.mTrailer.addView(item);
+                    }
                 }
 
-                if (!unique.containsValue(data.getString(COL_REVIEW_URL))) {
-                    unique.put(data.getString(COL_REVIEW_URL),data.getString(COL_REVIEW_URL));
-                    item = LayoutInflater.from(getActivity()).inflate(R.layout.view_items, null);
-                    reviewImage = (ImageView) item.findViewById(R.id.imageViewPlay);
-                    reviewImage.setImageResource(R.drawable.text);
-                    textView = (TextView) item.findViewById(R.id.textViewTrailer);
-                    textView.setText(getString(R.string.read_pre)+" "+data.getString(COL_REVIEW_AUTHOR)+ getString(R.string.read_pos));
-                    viewHolder.mReview.addView(item);
+                if (data.getColumnIndex(MovieContract.ReviewsEntry.COLUMN_AUTHOR) != -1) {
+                    if (!unique.containsValue(data.getString(data.getColumnIndex(MovieContract.ReviewsEntry.COLUMN_URL)))) {
+                        unique.put(data.getString(data.getColumnIndex(MovieContract.ReviewsEntry.COLUMN_URL)),data.getString(data.getColumnIndex(MovieContract.ReviewsEntry.COLUMN_URL)));
+                        item = LayoutInflater.from(getActivity()).inflate(R.layout.view_items, null);
+                        auxImage = (ImageView) item.findViewById(R.id.imageViewPlay);
+                        auxImage.setImageResource(R.drawable.text);
+                        final String url = data.getString(data.getColumnIndex(MovieContract.ReviewsEntry.COLUMN_URL));
+                        auxImage.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                                startActivity(intent);
+                            }
+                        });
+                        textView = (TextView) item.findViewById(R.id.textViewTrailer);
+                        textView.setText(getString(R.string.read_pre)+" "+data.getString(data.getColumnIndex(MovieContract.ReviewsEntry.COLUMN_AUTHOR))+ getString(R.string.read_pos));
+                        viewHolder.mReview.addView(item);
+                    }
                 }
 
 
@@ -162,12 +184,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
             /*
             Testar se filmes está na tabela de favoritos, se sim mudar para star_nig_on
-            implementar o clicklistener para adicionar/remover o filme dos favoritos
-            ------
-             Preciso alterar o inner join para ser único (já fiz e já fiz alteraçoes no provider) e preciso testar como preencher a tela evitando repetir dados ou instruções,
-             pois com a inner join única teremos registros repetidos com alteração apenas nos campos da reviews e da trailer.
-             Penso em um método que edite esses dados, recebe o cursor duplicado e retorna um cv talvez com os dados dos trailer e dos reviews.
-             */
+            implementar o clicklistener para adicionar/remover o filme dos favoritos*/
 
         }
     }

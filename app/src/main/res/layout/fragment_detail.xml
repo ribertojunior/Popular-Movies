@@ -12,17 +12,30 @@
         >
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="144dp">
+            android:layout_height="144dp"
+            android:background="@color/colorPrimary"
+            android:orientation="vertical">
             <TextView
                 android:layout_width="match_parent"
-                android:layout_height="144dp"
+                android:layout_height="wrap_content"
                 android:paddingLeft="32dp"
+                android:paddingTop="28dp"
                 android:id="@+id/movieTitleText"
-                android:textSize="45sp"
+                android:textSize="34sp"
                 android:textColor="@color/colorTextLight"
-                android:background="@color/colorPrimary"
                 tools:text="Meuzovo O Filme"
                 android:gravity="left|center_vertical" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/dateText"
+                android:textSize="20sp"
+                android:text="(2010)"
+                android:layout_marginLeft="27dp"
+                android:layout_marginStart="27dp"
+                android:textColor="@color/colorTextLight"
+                android:paddingBottom="8dp" />
+
         </LinearLayout>
 
         <RelativeLayout
@@ -41,56 +54,6 @@
                 android:layout_alignParentStart="true"
                 android:src="@drawable/place_holder" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/voteAvgText"
-                android:layout_marginTop="20dp"
-                android:layout_below="@+id/imageView"
-                android:layout_alignLeft="@+id/dateText"
-                android:layout_alignStart="@+id/dateText"
-                android:textSize="20sp"
-                android:textColor="@color/colorText" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/userRatingText"
-                android:text="@string/user_rating"
-                android:inputType="text"
-                android:layout_alignTop="@+id/voteAvgText"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentStart="true"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:textColor="@color/colorText" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/ReleaseDateText"
-                android:text="@string/release_date"
-                android:layout_below="@+id/userRatingText"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentStart="true"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:textColor="@color/colorText" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:inputType="date"
-                android:ems="10"
-                android:id="@+id/dateText"
-                android:textSize="20sp"
-                android:layout_alignBottom="@+id/ReleaseDateText"
-                android:layout_toRightOf="@+id/ReleaseDateText"
-                android:layout_toEndOf="@+id/ReleaseDateText"
-                android:layout_marginLeft="27dp"
-                android:layout_marginStart="27dp"
-                android:textColor="@color/colorText" />
-
             <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -106,8 +69,8 @@
                 android:background="@color/colorPrimaryDark"
                 android:layout_width="wrap_content"
                 android:layout_alignTop="@+id/overviewText"
-                android:layout_alignRight="@+id/dateText"
-                android:layout_alignEnd="@+id/dateText" />
+                android:layout_alignRight="@+id/userRatingText"
+                android:layout_alignEnd="@+id/imageViewStar" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -115,9 +78,9 @@
                 android:id="@+id/overviewText"
                 android:textSize="20sp"
                 android:textColor="@color/colorText"
-                android:layout_below="@+id/ReleaseDateText"
-                android:layout_alignRight="@+id/dateText"
-                android:layout_alignEnd="@+id/dateText" />
+                android:layout_below="@+id/userRatingText"
+                android:layout_alignRight="@+id/userRatingText"
+                android:layout_alignEnd="@+id/imageViewStar" />
 
             <View
                 android:id="@+id/viewLine2"
@@ -141,11 +104,12 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
 
-                android:layout_alignRight="@+id/dateText"
-                android:layout_alignEnd="@+id/dateText"
+
+                android:layout_alignRight="@+id/userRatingText"
                 android:id="@+id/viewTrailer"
                 android:layout_below="@+id/trailerText"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:layout_alignEnd="@+id/imageViewStar">
 
             </LinearLayout>
             <TextView
@@ -162,13 +126,39 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
-                android:layout_alignRight="@+id/dateText"
-                android:layout_alignEnd="@+id/dateText"
+                android:layout_alignRight="@+id/userRatingText"
+                android:layout_alignEnd="@+id/imageViewStar"
                 android:id="@+id/viewReview"
                 android:layout_below="@+id/reviewsText"
                 android:orientation="vertical">
 
             </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/userRatingText"
+                android:text="@string/user_rating"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="@color/colorText"
+                android:layout_alignBaseline="@+id/voteAvgText"
+                android:layout_alignBottom="@+id/voteAvgText"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/voteAvgText"
+                android:layout_marginTop="19dp"
+                android:textSize="20sp"
+                android:textColor="@color/colorText"
+                android:text="9.9"
+                android:layout_below="@+id/imageView"
+                android:layout_toRightOf="@+id/userRatingText"
+                android:layout_toEndOf="@+id/userRatingText"
+                android:paddingStart="8dp" />
 
 
         </RelativeLayout>

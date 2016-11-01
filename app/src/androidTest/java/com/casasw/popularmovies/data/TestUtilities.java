@@ -36,17 +36,7 @@ public class TestUtilities extends AndroidTestCase {
             MovieContract.ReviewsEntry.COLUMN_URL
 
     };
-    static final int COL_ID = 0;
-    static final int COL_MOVIE_ID = 1;
-    static final int COL_ORIGINAL_TITLE = 2;
-    static final int COL_RELEASE_DATE = 3;
-    static final int COL_POSTER_PATH = 4;
-    static final int COL_OVERVIEW = 5;
-    static final int COL_VOTE_AVARAGE = 6;
-    static final int COL_BACKDROP_PATH = 7;
-    static final int COL_MOVIE_LIST = 8;
-    static final int COL_REVIEW_AUTHOR = 9;
-    static final int COL_REVIEW_URL = 10;
+
 
     static final String[] MOVIE_TRAILERS_COLUMNS = {
             MovieContract.MovieEntry.TABLE_NAME + "." + MovieContract.MovieEntry.COLUMN_MOVIE_ID,
@@ -62,9 +52,26 @@ public class TestUtilities extends AndroidTestCase {
             MovieContract.TrailersEntry.COLUMN_KEY,
 
     };
-    static final int COL_TRAILER_SITE = 9;
-    static final int COL_TRAILER_NAME = 10;
-    static final int COL_TRAILER_KEY = 11;
+
+    static final String[] MOVIE_DETAIL_COLUMNS = {
+            MovieContract.FavoritesEntry.TABLE_NAME + "." + MovieContract.FavoritesEntry.COLUMN_MOVIE_ID,
+            MovieContract.FavoritesEntry.TABLE_NAME + "." + MovieContract.FavoritesEntry.COLUMN_ORIGINAL_TITLE,
+            MovieContract.FavoritesEntry.TABLE_NAME + "." + MovieContract.FavoritesEntry.COLUMN_RELEASE_DATE,
+            MovieContract.FavoritesEntry.TABLE_NAME + "." + MovieContract.FavoritesEntry.COLUMN_POSTER_PATH,
+            MovieContract.FavoritesEntry.TABLE_NAME + "." + MovieContract.FavoritesEntry.COLUMN_OVERVIEW,
+            MovieContract.FavoritesEntry.TABLE_NAME + "." + MovieContract.FavoritesEntry.COLUMN_VOTE_AVERAGE,
+            MovieContract.FavoritesEntry.TABLE_NAME + "." + MovieContract.FavoritesEntry.COLUMN_BACKDROP_PATH,
+            MovieContract.ReviewsEntry.COLUMN_AUTHOR,
+            MovieContract.ReviewsEntry.COLUMN_URL,
+            MovieContract.TrailersEntry.COLUMN_SITE,
+            MovieContract.TrailersEntry.COLUMN_NAME,
+            MovieContract.TrailersEntry.COLUMN_KEY,
+            MovieContract.FavoritesEntry.TABLE_NAME +"."+MovieContract.FavoritesEntry.COLUMN_MOVIE_ID
+
+    };
+
+
+
 
 
     static void validateCursor(String error, Cursor valueCursor, ContentValues expectedValues) {
@@ -97,7 +104,7 @@ public class TestUtilities extends AndroidTestCase {
      */
     static ContentValues createMoviesValues() {
         ContentValues values = new ContentValues();
-        long movieId = 1001;
+        long movieId = (long) Math.floor(Math.random()*2000);
         values.put(MovieContract.MovieEntry.COLUMN_MOVIE_ID, movieId);
         values.put(MovieContract.MovieEntry.COLUMN_POSTER_PATH, "/aisfsaifb28y842");
         values.put(MovieContract.MovieEntry.COLUMN_OVERVIEW, "Filme bosta dozovo.");
@@ -118,7 +125,7 @@ public class TestUtilities extends AndroidTestCase {
     static ContentValues createFavoriteValues(long id) {
         // Create a new map of values, where column names are the keys
         ContentValues testValues = new ContentValues();
-        testValues.put(MovieContract.FavoritesEntry.COLUMN_MOVIE_KEY, id);
+        testValues.put(MovieContract.FavoritesEntry.COLUMN_MOVIE_ID, id);
         testValues.put(MovieContract.FavoritesEntry.COLUMN_ORIGINAL_TITLE, TEST_MOVIE_TITLE);
 
         return testValues;
@@ -146,6 +153,7 @@ public class TestUtilities extends AndroidTestCase {
         ContentValues testValues = new ContentValues();
         long randomAdd = (long) Math.floor(Math.random()*1000);
         testValues.put(MovieContract.TrailersEntry.COLUMN_MOVIE_KEY, id);
+        testValues.put(MovieContract.TrailersEntry.COLUMN_TRAILER_ID, (id+randomAdd));
         testValues.put(MovieContract.TrailersEntry.COLUMN_KEY, "fk4BbF7B29w"+randomAdd);
         testValues.put(MovieContract.TrailersEntry.COLUMN_NAME, "Meuzovo ["+randomAdd+"] Original Theatrical Trailer");
         testValues.put(MovieContract.TrailersEntry.COLUMN_SITE, "youtube");

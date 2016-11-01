@@ -29,6 +29,44 @@ public class MovieProvider extends ContentProvider {
 
     private static final UriMatcher sUriMatcher = buildUriMatcher();
 
+    static final String[] MOVIE_TRAILERS_COLUMNS = {
+            MovieContract.MovieEntry.TABLE_NAME + "." + MovieContract.MovieEntry.COLUMN_MOVIE_ID,
+            MovieContract.MovieEntry.COLUMN_ORIGINAL_TITLE,
+            MovieContract.MovieEntry.COLUMN_RELEASE_DATE,
+            MovieContract.MovieEntry.COLUMN_POSTER_PATH,
+            MovieContract.MovieEntry.COLUMN_OVERVIEW,
+            MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE,
+            MovieContract.MovieEntry.COLUMN_BACKDROP_PATH,
+            MovieContract.MovieEntry.COLUMN_MOVIE_LIST,
+            MovieContract.TrailersEntry.COLUMN_SITE,
+            MovieContract.TrailersEntry.COLUMN_NAME,
+            MovieContract.TrailersEntry.COLUMN_KEY,
+
+    };
+
+    static final String[] MOVIE_REVIEWS_COLUMNS = {
+            MovieContract.MovieEntry.TABLE_NAME + "." + MovieContract.MovieEntry.COLUMN_MOVIE_ID,
+            MovieContract.MovieEntry.COLUMN_ORIGINAL_TITLE,
+            MovieContract.MovieEntry.COLUMN_RELEASE_DATE,
+            MovieContract.MovieEntry.COLUMN_POSTER_PATH,
+            MovieContract.MovieEntry.COLUMN_OVERVIEW,
+            MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE,
+            MovieContract.MovieEntry.COLUMN_BACKDROP_PATH,
+            MovieContract.MovieEntry.COLUMN_MOVIE_LIST,
+            MovieContract.ReviewsEntry.COLUMN_AUTHOR,
+            MovieContract.ReviewsEntry.COLUMN_URL
+
+    };
+
+
+    private static final SQLiteQueryBuilder sMovieQueryBuilder;
+    static {
+        sMovieQueryBuilder = new SQLiteQueryBuilder();
+        sMovieQueryBuilder.setTables(
+                MovieContract.MovieEntry.TABLE_NAME
+        );
+    }
+
     private static final SQLiteQueryBuilder sMovieListQueryBuilder;
     static {
         sMovieListQueryBuilder = new SQLiteQueryBuilder();
@@ -38,26 +76,32 @@ public class MovieProvider extends ContentProvider {
                         " ON " + MovieContract.MovieEntry.TABLE_NAME +
                         "." + MovieContract.MovieEntry.COLUMN_MOVIE_ID +
                         " = " + MovieContract.FavoritesEntry.TABLE_NAME +
-                        "." + MovieContract.FavoritesEntry.COLUMN_MOVIE_KEY
+                        "." + MovieContract.FavoritesEntry.COLUMN_MOVIE_ID
         );
     }
 
-    private static final SQLiteQueryBuilder sMovieQueryBuilder;
+    private static final SQLiteQueryBuilder sMovieTrailerQueryBuilder;
     static {
-        sMovieQueryBuilder = new SQLiteQueryBuilder();
-        sMovieQueryBuilder.setTables(
+        sMovieTrailerQueryBuilder = new SQLiteQueryBuilder();
+        sMovieTrailerQueryBuilder.setTables(
                 MovieContract.MovieEntry.TABLE_NAME + " INNER JOIN " +
-                        MovieContract.ReviewsEntry.TABLE_NAME +
-                        " ON " + MovieContract.MovieEntry.TABLE_NAME +
-                        "."  + MovieContract.MovieEntry.COLUMN_MOVIE_ID +
-                        " = " + MovieContract.ReviewsEntry.TABLE_NAME +
-                        "."  + MovieContract.ReviewsEntry.COLUMN_MOVIE_KEY +
-                        " INNER JOIN " +
                         MovieContract.TrailersEntry.TABLE_NAME +
                         " ON " + MovieContract.MovieEntry.TABLE_NAME +
                         "."  + MovieContract.MovieEntry.COLUMN_MOVIE_ID +
-                        " = " + MovieContract.FavoritesEntry.TABLE_NAME +
-                        "."  + MovieContract.FavoritesEntry.COLUMN_MOVIE_KEY
+                        " = " + MovieContract.TrailersEntry.TABLE_NAME +
+                        "."  + MovieContract.TrailersEntry.COLUMN_MOVIE_KEY
+        );
+    }
+    private static final SQLiteQueryBuilder sMovieReviewsQueryBuilder;
+    static {
+        sMovieReviewsQueryBuilder = new SQLiteQueryBuilder();
+        sMovieReviewsQueryBuilder.setTables(
+                MovieContract.MovieEntry.TABLE_NAME + " INNER JOIN " +
+                        MovieContract.ReviewsEntry.TABLE_NAME +
+                        " ON " + MovieContract.MovieEntry.TABLE_NAME +
+                        "." + MovieContract.MovieEntry.COLUMN_MOVIE_ID +
+                        " = " + MovieContract.ReviewsEntry.TABLE_NAME +
+                        "." + MovieContract.ReviewsEntry.COLUMN_MOVIE_KEY
         );
     }
     /*New query builders*/
@@ -83,20 +127,13 @@ public class MovieProvider extends ContentProvider {
 
     /*End of new query builders*/
 
-    private static final String sMovieReviewsTrailersSelection =
-            MovieContract.MovieEntry.TABLE_NAME +
-                    "." + MovieContract.MovieEntry.COLUMN_MOVIE_ID + " = ? AND " +
-                    MovieContract.TrailersEntry.TABLE_NAME +
-                    "." + MovieContract.TrailersEntry.COLUMN_MOVIE_KEY + " = ?  AND " +
-                    MovieContract.ReviewsEntry.TABLE_NAME +
-                    "." + MovieContract.ReviewsEntry.COLUMN_MOVIE_KEY + " = ?";
-
     private static final String sMovieFavoritesSelection =
             MovieContract.FavoritesEntry.TABLE_NAME + ";";
 
     private static final String sMovieListSelection =
             MovieContract.MovieEntry.TABLE_NAME+
                     "." + MovieContract.MovieEntry.COLUMN_MOVIE_LIST + " = ?";
+
     private static final String sMovieIDSelection =
             MovieContract.MovieEntry.TABLE_NAME+
                     "." + MovieContract.MovieEntry.COLUMN_MOVIE_ID + " = ?";
@@ -132,16 +169,23 @@ public class MovieProvider extends ContentProvider {
     }
 
     private Cursor getMovieReviewsTrailers (Uri uri, String[] projection, String sortOrder) {
-        String[] selectionArgs = new String[]{MovieContract.MovieEntry.getMovieIDFromUri(uri),
-                MovieContract.MovieEntry.getMovieIDFromUri(uri),
-                MovieContract.MovieEntry.getMovieIDFromUri(uri)};
-        return sMovieReviewsTrailerQueryBuilder.query(mOpenHelper.getReadableDatabase(),
-                projection,
-                sMovieReviewsTrailersSelection,
-                selectionArgs,
-                null,
-                null,
-                sortOrder);
+        String[] selectionArgs = new String[]{MovieContract.MovieEntry.getMovieIDFromUri(uri)};
+        SQLiteQueryBuilder[] queryBuilders = {sMovieReviewsTrailerQueryBuilder, sMovieTrailerQueryBuilder, sMovieReviewsQueryBuilder, sMovieQueryBuilder};
+        String[][] projections = {projection, MOVIE_TRAILERS_COLUMNS, MOVIE_REVIEWS_COLUMNS, null};
+        Cursor retCursor;
+        int i =0;
+        do {
+            retCursor = queryBuilders[i].query(mOpenHelper.getReadableDatabase(),
+                    projections[i],
+                    sMovieIDSelection,
+                    selectionArgs,
+                    null,
+                    null,
+                    sortOrder);
+            i++;
+        }while (!retCursor.moveToFirst());
+
+        return retCursor;
     }
 
     static UriMatcher buildUriMatcher() {
@@ -241,12 +285,18 @@ public class MovieProvider extends ContentProvider {
                 break;
             }
             case MOVIE_REVIEWS_TRAILER_ID: {
-                selectionArgs = new String[]{MovieContract.MovieEntry.getMovieIDFromUri(uri)};
                 retCursor = getMovieReviewsTrailers(uri,projection, sortOrder);
                 break;
             }
             case FAVORITES: {
-                retCursor = getFavoritesMovies(uri, projection, selectionArgs, sortOrder);
+                retCursor = mOpenHelper.getReadableDatabase().query(
+                        MovieContract.FavoritesEntry.TABLE_NAME,
+                        projection,
+                        selection,
+                        selectionArgs,
+                        null,
+                        null,
+                        sortOrder);
                 break;
             }
             case REVIEWS: {
@@ -298,7 +348,7 @@ public class MovieProvider extends ContentProvider {
             }
             case FAVORITES: {
                 ContentValues favoritesCV = new ContentValues();
-                favoritesCV.put(MovieContract.FavoritesEntry.COLUMN_MOVIE_KEY,(Long) contentValues.get(MovieContract.MovieEntry._ID));
+                favoritesCV.put(MovieContract.FavoritesEntry.COLUMN_MOVIE_ID,(Long) contentValues.get(MovieContract.MovieEntry._ID));
                 favoritesCV.put(MovieContract.FavoritesEntry.COLUMN_ORIGINAL_TITLE,(String) contentValues.get(MovieContract.MovieEntry.COLUMN_ORIGINAL_TITLE));
                 long _id = db.insert(MovieContract.FavoritesEntry.TABLE_NAME, null, favoritesCV);
                 if (_id > 0)
@@ -310,7 +360,7 @@ public class MovieProvider extends ContentProvider {
             case REVIEWS: {
                 /*ContentValues reviewsCV = new ContentValues();
                 reviewsCV.put(MovieContract.ReviewsEntry.COLUMN_REVIEW_ID, (String) contentValues.get(MovieContract.ReviewsEntry.COLUMN_REVIEW_ID));
-                reviewsCV.put(MovieContract.ReviewsEntry.COLUMN_MOVIE_KEY, (String) contentValues.get(MovieContract.ReviewsEntry.COLUMN_MOVIE_KEY));
+                reviewsCV.put(MovieContract.ReviewsEntry.COLUMN_MOVIE_ID, (String) contentValues.get(MovieContract.ReviewsEntry.COLUMN_MOVIE_ID));
                 reviewsCV.put(COLUMN_AUTHOR, (String) contentValues.get(COLUMN_AUTHOR));
                 reviewsCV.put(COLUMN_URL, (String) contentValues.get(COLUMN_URL));*/
                 long _id = db.insert(MovieContract.ReviewsEntry.TABLE_NAME, null, contentValues);
@@ -323,7 +373,7 @@ public class MovieProvider extends ContentProvider {
             }
             case TRAILERS: {
                 /*ContentValues trailersCV = new ContentValues();
-                trailersCV.put(MovieContract.TrailersEntry.COLUMN_MOVIE_KEY, (String) contentValues.get(MovieContract.TrailersEntry.COLUMN_MOVIE_KEY));
+                trailersCV.put(MovieContract.TrailersEntry.COLUMN_MOVIE_ID, (String) contentValues.get(MovieContract.TrailersEntry.COLUMN_MOVIE_ID));
                 trailersCV.put(MovieContract.TrailersEntry.COLUMN_TRAILER_ID, (String) contentValues.get(MovieContract.TrailersEntry.COLUMN_TRAILER_ID));
                 trailersCV.put(MovieContract.TrailersEntry.COLUMN_KEY, (String) contentValues.get(MovieContract.TrailersEntry.COLUMN_KEY));
                 trailersCV.put(MovieContract.TrailersEntry.COLUMN_NAME, (String) contentValues.get(MovieContract.TrailersEntry.COLUMN_NAME));

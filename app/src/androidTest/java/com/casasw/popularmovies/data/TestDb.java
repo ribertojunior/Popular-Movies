@@ -190,21 +190,38 @@ public class TestDb extends AndroidTestCase {
         SQLiteDatabase db = new MovieDbHelper(
                 this.mContext).getWritableDatabase();
         ContentValues cv = TestUtilities.createMoviesValues();
-
+        ContentValues cvFav = cv;
+        long[] movieId = new long[2];
+        movieId[0] = cv.getAsLong(MovieContract.MovieEntry.COLUMN_MOVIE_ID);
         long in = db.insert(MovieContract.MovieEntry.TABLE_NAME, null, cv);
         assertTrue("Error: Insertion in movie table has fail.", in != -1 );
 
-        for (int j = 0; j<3;j++) {
-            cv = TestUtilities.createReviewsValues(cv.getAsLong(MovieContract.MovieEntry.COLUMN_MOVIE_ID));
+        cvFav.remove(MovieContract.MovieEntry.COLUMN_POSITION);
+        cvFav.remove(MovieContract.MovieEntry.COLUMN_MOVIE_LIST);
+        in = db.insert(MovieContract.FavoritesEntry.TABLE_NAME, null, cvFav);
+        assertTrue("Error: Insertion in FavoritesEntry table has fail.", in != -1 );
 
-            in = db.insert(MovieContract.ReviewsEntry.TABLE_NAME, null, cv);
-            assertTrue("Error: Insertion in ReviewsEntry table has fail.", in != -1 );
 
-            cv = TestUtilities.createTrailersValues(cv.getAsLong(MovieContract.ReviewsEntry.COLUMN_MOVIE_KEY));
+        //Another movie
+        cv = TestUtilities.createMoviesValues();
+        cv.put(MovieContract.MovieEntry.COLUMN_POSITION, 2);
+        in = db.insert(MovieContract.MovieEntry.TABLE_NAME, null, cv);
+        assertTrue("Error: 2nd insertion in movie table has fail.", in != -1 );
+        movieId[1] = cv.getAsLong(MovieContract.MovieEntry.COLUMN_MOVIE_ID);
+        for (int i=0;i<2;i++) {
+            for (int j = 0; j<3;j++) {
+                cv = TestUtilities.createReviewsValues(movieId[i]);
 
-            in = db.insert(MovieContract.TrailersEntry.TABLE_NAME, null, cv);
-            assertTrue("Error: Insertion in TrailersEntry table has fail.", in != -1 );
+                in = db.insert(MovieContract.ReviewsEntry.TABLE_NAME, null, cv);
+                assertTrue("Error: Insertion in ReviewsEntry table has fail.", in != -1 );
+
+                cv = TestUtilities.createTrailersValues(movieId[i]);
+
+                in = db.insert(MovieContract.TrailersEntry.TABLE_NAME, null, cv);
+                assertTrue("Error: Insertion in TrailersEntry table has fail.", in != -1 );
+            }
         }
+
 
         SQLiteQueryBuilder sMovieQueryBuilder;
         sMovieQueryBuilder = new SQLiteQueryBuilder();
@@ -217,12 +234,14 @@ public class TestDb extends AndroidTestCase {
                         "."  + MovieContract.ReviewsEntry.COLUMN_MOVIE_KEY
 
         );
-        String selection = MovieContract.MovieEntry.TABLE_NAME +
+        /*String selection = MovieContract.MovieEntry.TABLE_NAME +
                 "." + MovieContract.MovieEntry.COLUMN_MOVIE_ID + " = ? AND " +
                 MovieContract.ReviewsEntry.TABLE_NAME +
-                "." + MovieContract.ReviewsEntry.COLUMN_MOVIE_KEY + " = ?";
-        String id =  cv.getAsString(MovieContract.TrailersEntry.COLUMN_MOVIE_KEY);
-        String[] selectionArgs = new String[]{id, id};
+                "." + MovieContract.ReviewsEntry.COLUMN_MOVIE_ID + " = ?";
+        String[] selectionArgs = new String[]{""+movieId, ""+movieId};*/
+        String selection = MovieContract.MovieEntry.TABLE_NAME +
+                "." + MovieContract.MovieEntry.COLUMN_MOVIE_ID + " = ? ";
+        String[] selectionArgs = new String[]{""+movieId[0]};
 
         Cursor c = sMovieQueryBuilder.query(db, TestUtilities.MOVIE_REVIEWS_COLUMNS, selection, selectionArgs, null, null, null);
         assertTrue("Error REVIEWS inner join returning zero rows. ", c.moveToFirst());
@@ -252,10 +271,7 @@ public class TestDb extends AndroidTestCase {
                         " = " + MovieContract.TrailersEntry.TABLE_NAME +
                         "."  + MovieContract.TrailersEntry.COLUMN_MOVIE_KEY
         );
-        selection = MovieContract.MovieEntry.TABLE_NAME +
-                "." + MovieContract.MovieEntry.COLUMN_MOVIE_ID + " = ? AND " +
-                MovieContract.TrailersEntry.TABLE_NAME +
-                "." + MovieContract.TrailersEntry.COLUMN_MOVIE_KEY + " = ? ";
+
 
 
 
@@ -278,6 +294,44 @@ public class TestDb extends AndroidTestCase {
         Log.v(LOG_TAG, col);
         Log.v(LOG_TAG, values);
 
+
+        sMovieQueryBuilder = new SQLiteQueryBuilder();
+        sMovieQueryBuilder.setTables(
+                MovieContract.FavoritesEntry.TABLE_NAME+ " INNER JOIN " +
+                        MovieContract.ReviewsEntry.TABLE_NAME +
+                        " ON " + MovieContract.FavoritesEntry.TABLE_NAME +
+                        "."  + MovieContract.FavoritesEntry.COLUMN_MOVIE_ID +
+                        " = " + MovieContract.ReviewsEntry.TABLE_NAME +
+                        "."  + MovieContract.ReviewsEntry.COLUMN_MOVIE_KEY +
+                        " INNER JOIN " +
+                        MovieContract.TrailersEntry.TABLE_NAME +
+                        " ON " + MovieContract.FavoritesEntry.TABLE_NAME +
+                        "."  + MovieContract.FavoritesEntry.COLUMN_MOVIE_ID +
+                        " = " + MovieContract.FavoritesEntry.TABLE_NAME +
+                        "."  + MovieContract.FavoritesEntry.COLUMN_MOVIE_ID
+
+        );
+
+
+        c = sMovieQueryBuilder.query(db, TestUtilities.MOVIE_DETAIL_COLUMNS, null, null, null, null, null);
+        assertTrue("Error detail inner join returning zero rows. ", c.moveToFirst());
+
+        Log.v(LOG_TAG, "testInnerJoin: Complete with favorites");
+
+        col = "";
+        for (int i =0;i<c.getColumnCount();i++) {
+            col =  col + "["+c.getColumnName(i)+"] - ";
+        }
+        values = "";
+        do {
+            for (int i =0;i<c.getColumnCount();i++) {
+                values =  values + c.getString(i) +" - ";
+            }
+            values = values + "\n";
+
+        }while (c.moveToNext());
+        Log.v(LOG_TAG, col);
+        Log.v(LOG_TAG, values);
 
     }
 
@@ -331,7 +385,7 @@ public class TestDb extends AndroidTestCase {
         // (you can use the createFavoriteValues if you wish)
         //ContentValues cv = TestUtilities.createFavoriteValues();
         ContentValues cv = new ContentValues();
-        cv.put(MovieContract.FavoritesEntry.COLUMN_MOVIE_KEY, testMovieKey);
+        cv.put(MovieContract.FavoritesEntry.COLUMN_MOVIE_ID, testMovieKey);
         cv.put(MovieContract.FavoritesEntry.COLUMN_ORIGINAL_TITLE, testOriginalTitle);
 
 

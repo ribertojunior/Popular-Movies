@@ -39,10 +39,13 @@ public class MovieDbHelper extends SQLiteOpenHelper {
 
         final String SQL_CREATE_FAVORITES_TABLE = "CREATE TABLE " + MovieContract.FavoritesEntry.TABLE_NAME + " (" +
                 MovieContract.FavoritesEntry._ID + "INTEGER PRIMARY KEY,"+
-                MovieContract.FavoritesEntry.COLUMN_MOVIE_KEY + " INTEGER UNIQUE NOT NULL," +
-                MovieContract.FavoritesEntry.COLUMN_ORIGINAL_TITLE + " TEXT NOT NULL, " +
-                "FOREIGN KEY (" + MovieContract.FavoritesEntry.COLUMN_MOVIE_KEY + ") REFERENCES "+
-                MovieContract.MovieEntry.TABLE_NAME + " (" + MovieContract.MovieEntry.COLUMN_MOVIE_ID + "));";
+                MovieContract.FavoritesEntry.COLUMN_MOVIE_ID + " INTEGER UNIQUE NOT NULL," +
+                MovieContract.FavoritesEntry.COLUMN_ORIGINAL_TITLE + " TEXT NOT NULL," +
+                MovieContract.FavoritesEntry.COLUMN_POSTER_PATH + " TEXT NOT NULL," +
+                MovieContract.FavoritesEntry.COLUMN_OVERVIEW + " TEXT NOT NULL," +
+                MovieContract.FavoritesEntry.COLUMN_BACKDROP_PATH + " TEXT NOT NULL," +
+                MovieContract.FavoritesEntry.COLUMN_VOTE_AVERAGE + " TEXT NOT NULL," +
+                MovieContract.FavoritesEntry.COLUMN_RELEASE_DATE + " TEXT NOT NULL);";
 
         sqLiteDatabase.execSQL(SQL_CREATE_FAVORITES_TABLE);
 
