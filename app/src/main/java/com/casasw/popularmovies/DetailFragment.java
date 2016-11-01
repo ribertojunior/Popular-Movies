@@ -1,10 +1,12 @@
 package com.casasw.popularmovies;
 
+import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
@@ -43,7 +45,6 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             MovieContract.MovieEntry.COLUMN_OVERVIEW,
             MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE,
             MovieContract.MovieEntry.COLUMN_BACKDROP_PATH,
-            MovieContract.MovieEntry.COLUMN_MOVIE_LIST,
             MovieContract.ReviewsEntry.COLUMN_AUTHOR,
             MovieContract.ReviewsEntry.COLUMN_URL,
             MovieContract.TrailersEntry.COLUMN_SITE,
@@ -58,12 +59,11 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     static final int COL_OVERVIEW = 4;
     static final int COL_VOTE_AVERAGE = 5;
     static final int COL_BACKDROP_PATH = 6;
-    static final int COL_MOVIE_LIST = 7;
-    static final int COL_REVIEW_AUTHOR = 8;
-    static final int COL_REVIEW_URL = 9;
-    static final int COL_TRAILER_SITE = 10;
-    static final int COL_TRAILER_NAME = 11;
-    static final int COL_TRAILER_KEY = 12;
+    static final int COL_REVIEW_AUTHOR = 7;
+    static final int COL_REVIEW_URL = 8;
+    static final int COL_TRAILER_SITE = 9;
+    static final int COL_TRAILER_NAME = 10;
+    static final int COL_TRAILER_KEY = 11;
 
 
     public DetailFragment() {
@@ -123,8 +123,40 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
             viewHolder.mVoteAvg.setText(data.getString(COL_VOTE_AVERAGE));
             viewHolder.mDate.setText("("+data.getString(COL_RELEASE_DATE).substring(0,4)+")");
+
+            final String selection = MovieContract.FavoritesEntry.TABLE_NAME +"."+ MovieContract.FavoritesEntry.COLUMN_MOVIE_ID + " = ? ";
+            final String[] args = new String[]{data.getString(COL_MOVIE_ID)};
+            final ContentValues cvFav = getFavoriteContentValues(data);
+            Cursor c = getContext().getContentResolver().query(MovieContract.FavoritesEntry.CONTENT_URI, null, selection, args,null);
             viewHolder.mStar.setImageResource(android.R.drawable.btn_star_big_off);
-            Log.v(LOG_TAG, "onLoadFinished: Raw data");
+            if (c.moveToFirst())
+                viewHolder.mStar.setImageResource(android.R.drawable.btn_star_big_on);
+
+            viewHolder.mStar.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    String msg;
+                    ImageView imageView = (ImageView) v;
+
+                    if (imageView.getDrawable().getConstantState().equals(
+                            getResources().getDrawable(android.R.drawable.btn_star_big_on).getConstantState())){
+                        imageView.setImageResource(android.R.drawable.btn_star_big_off);
+                        msg = getString(R.string.favorite_off);
+                        long del = getContext().getContentResolver().delete(MovieContract.FavoritesEntry.CONTENT_URI,
+                                selection, args);
+                        Log.v(LOG_TAG, "onClick: Del "+del);
+                    }else {
+                        imageView.setImageResource(android.R.drawable.btn_star_big_on);
+                        msg = getString(R.string.favorite_on);
+                        Uri uri = getContext().getContentResolver().insert(MovieContract.FavoritesEntry.CONTENT_URI, cvFav);
+                        Log.v(LOG_TAG, "onClick: Uri "+uri);
+                    }
+                    Snackbar.make(v, msg,
+                            Snackbar.LENGTH_SHORT)
+                            .show();
+                }
+            });
+
             View item;
             TextView textView;
             ImageView auxImage;
@@ -182,11 +214,25 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
             } while (data.moveToNext());
 
-            /*
-            Testar se filmes está na tabela de favoritos, se sim mudar para star_nig_on
-            implementar o clicklistener para adicionar/remover o filme dos favoritos*/
+
+
 
         }
+    }
+
+    private ContentValues getFavoriteContentValues(Cursor data) {
+        ContentValues cv = new ContentValues();
+        if (data.moveToFirst()) {
+            cv.put(MovieContract.FavoritesEntry.COLUMN_MOVIE_ID, data.getString(COL_MOVIE_ID));
+            cv.put(MovieContract.FavoritesEntry.COLUMN_ORIGINAL_TITLE, data.getString(COL_ORIGINAL_TITLE));
+            cv.put(MovieContract.FavoritesEntry.COLUMN_BACKDROP_PATH, data.getString(COL_BACKDROP_PATH));
+            cv.put(MovieContract.FavoritesEntry.COLUMN_OVERVIEW, data.getString(COL_OVERVIEW));
+            cv.put(MovieContract.FavoritesEntry.COLUMN_POSTER_PATH, data.getString(COL_POSTER_PATH));
+            cv.put(MovieContract.FavoritesEntry.COLUMN_RELEASE_DATE, data.getString(COL_RELEASE_DATE));
+            cv.put(MovieContract.FavoritesEntry.COLUMN_VOTE_AVERAGE, data.getString(COL_VOTE_AVERAGE));
+        }
+
+        return cv;
     }
 
     @Override

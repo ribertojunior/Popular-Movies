@@ -51,6 +51,17 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
     static final int COL_BACKDROP_PATH = 7;
     static final int COL_MOVIE_LIST = 8;
     static final int COL_POSITION = 9;
+    
+    private static final String[] MOVIE_FAVORITE_COLUMNS = {
+            MovieContract.FavoritesEntry.TABLE_NAME + "." + MovieContract.FavoritesEntry._ID,
+            MovieContract.FavoritesEntry.COLUMN_MOVIE_ID,
+            MovieContract.FavoritesEntry.COLUMN_ORIGINAL_TITLE,
+            MovieContract.FavoritesEntry.COLUMN_RELEASE_DATE,
+            MovieContract.FavoritesEntry.COLUMN_POSTER_PATH,
+            MovieContract.FavoritesEntry.COLUMN_OVERVIEW,
+            MovieContract.FavoritesEntry.COLUMN_VOTE_AVERAGE,
+            MovieContract.FavoritesEntry.COLUMN_BACKDROP_PATH
+    };
 
     private String mList;
 
@@ -85,23 +96,7 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
         mGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                /*Movie movie = new Movie(mMoviesList.get(i).getId(), mMoviesList.get(i).getTitle(),
-                        mMoviesList.get(i).getPoster(), mMoviesList.get(i).getThumbNail(),
-                        mMoviesList.get(i).getOverview(), mMoviesList.get(i).getVoteAvg(),
-                        mMoviesList.get(i).getReleaseDate());
-                DetailFragment detail = (DetailFragment) getActivity().getSupportFragmentManager()
-                        .findFragmentById(R.id.fragment_detail);
-                if (detail == null) {
-                    Intent intent = new Intent(getActivity(),DetailActivity.class);
-                    intent.putExtra("EXTRA_MOVIE", movie);
-                    intent.putExtra("EXTRA_POSITION",i);
-                    startActivity(intent);
-                } else {
-                    Bundle extras = new Bundle();
-                    extras.putParcelable("EXTRA_MOVIE", movie);
-                    detail.setArguments(extras);
-                    detail.updateContent();
-                }*/
+
                 Cursor cursor = (Cursor) adapterView.getItemAtPosition(i);
                 if (cursor != null) {
                     ((Callback) getActivity())
@@ -151,11 +146,13 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
         String movieList = Utilities.getMoviesList(getActivity());
         Uri movieListUri = MovieContract.MovieEntry.CONTENT_URI;
         String sortOrder = MovieContract.MovieEntry.COLUMN_POSITION + " ASC";
+        String[] projection = MOVIE_COLUMNS;
         if (movieList.equals(getString(R.string.pref_order_favorites_entry))) {
             movieListUri = MovieContract.FavoritesEntry.CONTENT_URI;
-            sortOrder = MovieContract.FavoritesEntry._ID + " ASC";
+            sortOrder = null;
+            projection = MOVIE_FAVORITE_COLUMNS;
         }
-        return new CursorLoader(getActivity(), movieListUri, MOVIE_COLUMNS, null, null, sortOrder);
+        return new CursorLoader(getActivity(), movieListUri, projection, null, null, sortOrder);
     }
 
     @Override

@@ -82,9 +82,6 @@ public class MovieContract {
         public static Uri buildFavoritesUri(long id) {
             return ContentUris.withAppendedId(CONTENT_URI, id);
         }
-       /* public static Uri buildFavoritesUriWithList(String movieList) {
-            return CONTENT_URI.buildUpon().appendPath(movieList).build();
-        }*/
 
         public static final String TABLE_NAME = "favorites";
 

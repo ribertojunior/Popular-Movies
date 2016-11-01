@@ -347,10 +347,7 @@ public class MovieProvider extends ContentProvider {
                 break;
             }
             case FAVORITES: {
-                ContentValues favoritesCV = new ContentValues();
-                favoritesCV.put(MovieContract.FavoritesEntry.COLUMN_MOVIE_ID,(Long) contentValues.get(MovieContract.MovieEntry._ID));
-                favoritesCV.put(MovieContract.FavoritesEntry.COLUMN_ORIGINAL_TITLE,(String) contentValues.get(MovieContract.MovieEntry.COLUMN_ORIGINAL_TITLE));
-                long _id = db.insert(MovieContract.FavoritesEntry.TABLE_NAME, null, favoritesCV);
+                long _id = db.insert(MovieContract.FavoritesEntry.TABLE_NAME, null, contentValues);
                 if (_id > 0)
                     returnUri = MovieContract.FavoritesEntry.buildFavoritesUri(_id);
                 else
@@ -358,11 +355,6 @@ public class MovieProvider extends ContentProvider {
                 break;
             }
             case REVIEWS: {
-                /*ContentValues reviewsCV = new ContentValues();
-                reviewsCV.put(MovieContract.ReviewsEntry.COLUMN_REVIEW_ID, (String) contentValues.get(MovieContract.ReviewsEntry.COLUMN_REVIEW_ID));
-                reviewsCV.put(MovieContract.ReviewsEntry.COLUMN_MOVIE_ID, (String) contentValues.get(MovieContract.ReviewsEntry.COLUMN_MOVIE_ID));
-                reviewsCV.put(COLUMN_AUTHOR, (String) contentValues.get(COLUMN_AUTHOR));
-                reviewsCV.put(COLUMN_URL, (String) contentValues.get(COLUMN_URL));*/
                 long _id = db.insert(MovieContract.ReviewsEntry.TABLE_NAME, null, contentValues);
                 if (_id > 0) {
                     returnUri = MovieContract.ReviewsEntry.buildReviewsUri(_id);
@@ -372,12 +364,6 @@ public class MovieProvider extends ContentProvider {
                 break;                
             }
             case TRAILERS: {
-                /*ContentValues trailersCV = new ContentValues();
-                trailersCV.put(MovieContract.TrailersEntry.COLUMN_MOVIE_ID, (String) contentValues.get(MovieContract.TrailersEntry.COLUMN_MOVIE_ID));
-                trailersCV.put(MovieContract.TrailersEntry.COLUMN_TRAILER_ID, (String) contentValues.get(MovieContract.TrailersEntry.COLUMN_TRAILER_ID));
-                trailersCV.put(MovieContract.TrailersEntry.COLUMN_KEY, (String) contentValues.get(MovieContract.TrailersEntry.COLUMN_KEY));
-                trailersCV.put(MovieContract.TrailersEntry.COLUMN_NAME, (String) contentValues.get(MovieContract.TrailersEntry.COLUMN_NAME));
-                trailersCV.put(MovieContract.TrailersEntry.COLUMN_SITE, (String) contentValues.get(MovieContract.TrailersEntry.COLUMN_SITE));*/
                 long _id = db.insert(MovieContract.TrailersEntry.TABLE_NAME, null, contentValues);
                 if (_id > 0) {
                     returnUri = MovieContract.TrailersEntry.buildTrailersUri(_id);
