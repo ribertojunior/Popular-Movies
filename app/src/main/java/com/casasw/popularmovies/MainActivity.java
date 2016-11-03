@@ -36,14 +36,13 @@ public class MainActivity extends AppCompatActivity implements MainFragment.Call
         }
 
         PopularMoviesSyncAdapter.initializeSyncAdapter(this);
-        PopularMoviesSyncAdapter.syncImmediately(this);
+        //PopularMoviesSyncAdapter.syncImmediately(this);
 
 
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
@@ -83,8 +82,6 @@ public class MainActivity extends AppCompatActivity implements MainFragment.Call
     @Override
     public void onItemSelected(Uri movieUri) {
         if (mTwoPane) {
-
-            //startActivity(intent);
             Bundle args =  new Bundle();
             args.putParcelable(DetailFragment.DETAIL_URI, movieUri);
             DetailFragment detailFragment = new DetailFragment();

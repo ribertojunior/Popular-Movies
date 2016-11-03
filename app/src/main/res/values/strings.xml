@@ -1,10 +1,7 @@
-<resources>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name">Popular Movies</string>
     <string name="action_settings">Settings</string>
     <string name="title_activity_activity_detail">Movie Details</string>
-    <string name="user_rating">User rating</string>
-    <string name="movie_title">Movie Title</string>
-    <string name="release_date">Release date</string>
     <string name="title_activity_settings">Settings</string>
 
 
@@ -36,7 +33,6 @@
         <item>@string/pref_order_favorites_entry</item>
     </string-array>
 
-    <string name="image_view_detail_description">Movie thumbnail.</string>
     <string name="play_trailer">Watch </string>
     <string name="trailers_text_view">Trailers</string>
     <string name="favorite_on">You\'ve added this movie to yours favorites.</string>
@@ -45,13 +41,18 @@
     <string name="read_pos">\'s review.</string>
 
     <!-- Error messages -->
-    <string name="error_internet">No internet connectivity.</string>
     <string name="reviews_text_view">Reviews</string>
-    <string name="no_detail_text_view">Tap a movie to see its details!</string>
     <!-- Account type (for sync-adapter authenticator) -->
     <!-- SyncAdapter related -->
     <string name="sync_account_type">popularmovies.casasw.com</string>
     <string name="content_authority">com.casasw.popularmovies</string>
 
+    <!-- String format -->
+    <string name="format_year">
+        (<xliff:g id="year">%1$s</xliff:g>)
+    </string>
+    <string name="format_vote">
+        <xliff:g id="vote">%1$s</xliff:g>/10
+    </string>
 
 </resources>

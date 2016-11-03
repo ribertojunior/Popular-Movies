@@ -2,7 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingTop="?attr/actionBarSize">
+    android:background="@color/colorBackground">
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
@@ -14,45 +14,56 @@
             android:layout_width="match_parent"
             android:layout_height="144dp"
             android:background="@color/colorPrimary"
-            android:orientation="vertical">
-            <TextView
+            android:orientation="vertical"
+            android:paddingLeft="32dp"
+            android:paddingStart="32dp"
+            android:paddingEnd="32dp"
+            android:paddingTop="?attr/actionBarSize">
+
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingLeft="32dp"
-                android:paddingTop="28dp"
-                android:id="@+id/movieTitleText"
-                android:textSize="34sp"
-                android:textColor="@color/colorTextLight"
-                tools:text="Meuzovo O Filme"
-                android:gravity="left|center_vertical" />
+                android:orientation="horizontal">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/movieTitleText"
+                    android:textSize="34sp"
+                    android:textColor="@color/colorTextLight"
+                    />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/dateText"
+                    android:textSize="18sp"
+                    android:paddingStart="8dp"
+                    android:paddingLeft="8dp"
+                    android:paddingRight="8dp"
+                    android:textColor="@color/colorTextLight"
+
+                    />
+            </LinearLayout>
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/dateText"
-                android:textSize="20sp"
-                android:text="(2010)"
-                android:layout_marginLeft="27dp"
-                android:layout_marginStart="27dp"
+                android:id="@+id/voteAvgText"
+                android:textSize="16sp"
                 android:textColor="@color/colorTextLight"
-                android:paddingBottom="8dp" />
+                />
+
 
         </LinearLayout>
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/root_layout"
-            android:paddingTop="8dp"
-            android:paddingLeft="16dp"
-            android:paddingRight="16dp">
+            android:layout_height="wrap_content">
             <ImageView
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:id="@+id/imageView"
                 android:layout_alignParentTop="true"
                 android:layout_alignParentLeft="true"
-                android:layout_alignParentStart="true"
-                android:src="@drawable/place_holder" />
+                android:layout_alignParentStart="true" />
 
             <ImageView
                 android:layout_width="wrap_content"
@@ -64,12 +75,12 @@
                 android:src="@android:drawable/btn_star_big_off" />
             <!--btn_star_big_on -->
             <View
-                android:id="@+id/viewLine"
                 android:layout_height="2dip"
                 android:background="@color/colorPrimaryDark"
                 android:layout_width="wrap_content"
                 android:layout_alignTop="@+id/overviewText"
-                android:layout_alignRight="@+id/userRatingText"
+                android:layout_alignRight="@+id/imageView"
+                android:layout_below="@+id/imageView"
                 android:layout_alignEnd="@+id/imageViewStar" />
 
             <TextView
@@ -78,12 +89,14 @@
                 android:id="@+id/overviewText"
                 android:textSize="20sp"
                 android:textColor="@color/colorText"
-                android:layout_below="@+id/userRatingText"
-                android:layout_alignRight="@+id/userRatingText"
-                android:layout_alignEnd="@+id/imageViewStar" />
+                android:layout_below="@+id/imageView"
+                android:layout_alignRight="@+id/imageView"
+                android:layout_alignEnd="@+id/imageViewStar"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
+                android:padding="8dp" />
 
             <View
-                android:id="@+id/viewLine2"
                 android:layout_height="2dip"
                 android:background="@color/colorPrimaryDark"
                 android:layout_width="wrap_content"
@@ -95,17 +108,17 @@
                 android:layout_height="wrap_content"
                 android:id="@+id/trailerText"
                 android:text="@string/trailers_text_view"
-                android:textSize="25sp"
+                android:textSize="24sp"
                 android:textColor="@color/colorText"
                 android:layout_below="@+id/overviewText"
-                android:textStyle="bold" />
+                android:padding="8dp" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
 
 
-                android:layout_alignRight="@+id/userRatingText"
+                android:layout_alignRight="@+id/imageView"
                 android:id="@+id/viewTrailer"
                 android:layout_below="@+id/trailerText"
                 android:orientation="vertical"
@@ -117,16 +130,16 @@
                 android:layout_height="wrap_content"
                 android:id="@+id/reviewsText"
                 android:text="@string/reviews_text_view"
-                android:textSize="25sp"
+                android:textSize="24sp"
                 android:textColor="@color/colorText"
                 android:layout_below="@+id/viewTrailer"
-                android:textStyle="bold" />
+                android:padding="8dp" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
-                android:layout_alignRight="@+id/userRatingText"
+                android:layout_alignRight="@+id/imageView"
                 android:layout_alignEnd="@+id/imageViewStar"
                 android:id="@+id/viewReview"
                 android:layout_below="@+id/reviewsText"
@@ -134,31 +147,7 @@
 
             </LinearLayout>
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/userRatingText"
-                android:text="@string/user_rating"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:textColor="@color/colorText"
-                android:layout_alignBaseline="@+id/voteAvgText"
-                android:layout_alignBottom="@+id/voteAvgText"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentStart="true" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/voteAvgText"
-                android:layout_marginTop="19dp"
-                android:textSize="20sp"
-                android:textColor="@color/colorText"
-                android:text="9.9"
-                android:layout_below="@+id/imageView"
-                android:layout_toRightOf="@+id/userRatingText"
-                android:layout_toEndOf="@+id/userRatingText"
-                android:paddingStart="8dp" />
 
 
         </RelativeLayout>

@@ -384,7 +384,7 @@ public class MovieProvider extends ContentProvider {
         final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         final int match = sUriMatcher.match(uri);
         int del;
-        if (s == null) {s="1";}; //deleting every registry
+        if (s == null) {s="1";} //deleting every registry
 
         switch (match){
             case MOVIE: {

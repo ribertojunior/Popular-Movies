@@ -11,6 +11,7 @@ import org.json.JSONObject;
 
 /**
  * Created by Junior on 31/08/2016.
+ * Utility class is self-explanatory
  */
 public class Utilities {
 
@@ -23,34 +24,26 @@ public class Utilities {
      */
     public static String[][] getDataFromJson(String jsonStr, String[] params)  throws JSONException {
 
-         //Log.v(LOG_TAG, "Original JSON: \n" + jsonStr.toString());
+
 
         JSONObject jsonObject = new JSONObject(jsonStr);
         JSONArray resultJsonArray = jsonObject.getJSONArray(params[0]);
 
-        //Log.v(LOG_TAG, "Result JSONArray: \n"+resultJsonArray.toString());
+
 
         String[][] resultStr = new String[resultJsonArray.length()][params.length - 1];
         JSONObject jsonList;
         for (int i = 0; i< resultJsonArray.length(); i++) {
 
             jsonList = resultJsonArray.getJSONObject(i);
-            //Log.v(LOG_TAG, "Movie ["+i+"]");
+
 
             for (int j=0;j<params.length-1;j++) {
                 resultStr[i][j]=jsonList.getString(params[j+1]);
-                //Log.v(LOG_TAG, params[j+1] +" - "+ resultStr[i][j] +" - "+ j);
-            }
-        }
-            /*for (String[] row : resultStr
-                 ) {
-                for (String item : row
-                     ) {
-                    Log.v(LOG_TAG, item);
-                }
 
             }
-            Log.v(LOG_TAG, "Total :"+resultStr.toString());*/
+        }
+
         return resultStr;
     }
     public static Uri uriMaker(String jpg) {

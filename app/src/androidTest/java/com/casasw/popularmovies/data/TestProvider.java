@@ -470,7 +470,7 @@ public class TestProvider extends AndroidTestCase {
         cursor.moveToFirst();
         ContentValues testValues = new ContentValues();
         for (int i=0;i<cursor.getColumnCount(); i++) {
-            if (cursor.getColumnName(i).toString().equals("movie_id")) {
+            if (cursor.getColumnName(i).equals("movie_id")) {
                 testValues.put(cursor.getColumnName(i), (cursor.getLong(i)));
             } else {
                 testValues.put(cursor.getColumnName(i), cursor.getString(i));

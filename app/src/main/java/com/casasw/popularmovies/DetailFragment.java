@@ -85,9 +85,9 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     public void onListChanged() {
         String list = Utilities.getMoviesList(getActivity());
         if ( mUri != null ){
-            mUri = MovieContract.MovieEntry.CONTENT_URI;
+            mUri = Uri.parse(MovieContract.MovieEntry.CONTENT_ITEM_TYPE);
             if (list.equals(getString(R.string.pref_order_favorites_entry))){
-                mUri = MovieContract.FavoritesEntry.CONTENT_URI;
+                mUri = Uri.parse(MovieContract.FavoritesEntry.CONTENT_ITEM_TYPE);
             }
             getLoaderManager().restartLoader(LOADER_ID, null, this);
         }
@@ -121,8 +121,10 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                             data.getString(COL_BACKDROP_PATH).substring(1),
                             "w342")).into(viewHolder.mBackdrop);
 
-            viewHolder.mVoteAvg.setText(data.getString(COL_VOTE_AVERAGE));
-            viewHolder.mDate.setText("("+data.getString(COL_RELEASE_DATE).substring(0,4)+")");
+            viewHolder.mVoteAvg.setText(
+                    String.format(getActivity().getString(R.string.format_vote),data.getString(COL_VOTE_AVERAGE)));
+            viewHolder.mDate.setText(
+                    String.format(getActivity().getString(R.string.format_year),data.getString(COL_RELEASE_DATE).substring(0,4)));
 
             final String selection = MovieContract.FavoritesEntry.TABLE_NAME +"."+ MovieContract.FavoritesEntry.COLUMN_MOVIE_ID + " = ? ";
             final String[] args = new String[]{data.getString(COL_MOVIE_ID)};
@@ -156,21 +158,12 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                             .show();
                 }
             });
-
+            c.close();
             View item;
             TextView textView;
             ImageView auxImage;
             HashMap<String, String> unique = new HashMap<>();
             do {
-               /*Log.v(LOG_TAG, "onLoadFinished: ---------------");
-
-                Log.v(LOG_TAG, "onLoadFinished: Trailer data: "+
-                        data.getString(COL_TRAILER_NAME)+" "+
-                        data.getString(COL_TRAILER_SITE)+" "+
-                        data.getString(COL_TRAILER_KEY));
-                Log.v(LOG_TAG, "onLoadFinished: Review data: "+
-                        data.getString(COL_REVIEW_AUTHOR)+" "+
-                        data.getString(COL_REVIEW_URL));*/
                 if (data.getColumnIndex(MovieContract.TrailersEntry.COLUMN_NAME) != -1) {
                     if (!unique.containsValue(data.getString(data.getColumnIndex(MovieContract.TrailersEntry.COLUMN_NAME)))) {
                         unique.put(data.getString(data.getColumnIndex(MovieContract.TrailersEntry.COLUMN_NAME)), data.getString(data.getColumnIndex(MovieContract.TrailersEntry.COLUMN_NAME)));
@@ -189,6 +182,8 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                         textView.setText(" "+getString(R.string.play_trailer)+" "+data.getString(data.getColumnIndex(MovieContract.TrailersEntry.COLUMN_NAME)));
                         viewHolder.mTrailer.addView(item);
                     }
+                } else {
+                    viewHolder.mTrailerText.setVisibility(View.INVISIBLE);
                 }
 
                 if (data.getColumnIndex(MovieContract.ReviewsEntry.COLUMN_AUTHOR) != -1) {
@@ -209,6 +204,8 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                         textView.setText(getString(R.string.read_pre)+" "+data.getString(data.getColumnIndex(MovieContract.ReviewsEntry.COLUMN_AUTHOR))+ getString(R.string.read_pos));
                         viewHolder.mReview.addView(item);
                     }
+                }else {
+                    viewHolder.mReviewText.setVisibility(View.INVISIBLE);
                 }
 
 
@@ -240,27 +237,30 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
     }
 
-    public static class  ViewHolder {
-        public final TextView mTitle;
-        public final ImageView mBackdrop;
-        public final TextView mVoteAvg;
-        public final TextView mDate;
-        public final ImageView mStar;
-        public final TextView mOverview;
-        public final LinearLayout mTrailer;
-        public final LinearLayout mReview;
+    protected static class  ViewHolder {
+        final TextView mTitle;
+        final ImageView mBackdrop;
+        final TextView mVoteAvg;
+        final TextView mDate;
+        final ImageView mStar;
+        final TextView mOverview;
+        final LinearLayout mTrailer;
+        final TextView mTrailerText;
+        final TextView mReviewText;
+        final LinearLayout mReview;
 
 
-        public ViewHolder(View view) {
+        ViewHolder(View view) {
             mTitle = (TextView) view.findViewById(R.id.movieTitleText);
             mBackdrop = (ImageView) view.findViewById(imageView);
             mVoteAvg = (TextView) view.findViewById(R.id.voteAvgText);
             mDate = (TextView) view.findViewById(R.id.dateText);
             mStar = (ImageView) view.findViewById(R.id.imageViewStar);
-
             mOverview = (TextView) view.findViewById(R.id.overviewText);
             mTrailer = (LinearLayout) view.findViewById(R.id.viewTrailer);
+            mTrailerText = (TextView) view.findViewById(R.id.trailerText);
             mReview = (LinearLayout) view.findViewById(R.id.viewReview);
+            mReviewText = (TextView) view.findViewById(R.id.reviewsText);
 
 
         }

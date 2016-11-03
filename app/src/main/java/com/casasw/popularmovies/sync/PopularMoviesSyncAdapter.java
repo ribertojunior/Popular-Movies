@@ -53,7 +53,7 @@ public class PopularMoviesSyncAdapter extends AbstractThreadedSyncAdapter {
         ////Log.v(LOG_TAG, "Order by: " + movieList);
         if (!movieList.equals(getContext().getString(R.string.pref_order_favorites_entry))) {
             try {
-                String jsonStr = null;
+                String jsonStr;
                 //fetching movie data
                 String path[] = {"3", "movie", movieList};
                 URL url = new URL(uriMaker(
@@ -144,14 +144,14 @@ public class PopularMoviesSyncAdapter extends AbstractThreadedSyncAdapter {
             movieValues.put(columns[0], params[0]);
             for (int j = 1; j < columns.length; j++) {
                 movieValues.put(columns[j], listJSON.getString(params[j]));
-                if (i==1) {
+                /*if (i==1) {
                     //Log.v(LOG_TAG, "insertDataFromJson: Inserting : "+listJSON.getString(params[j])+" in "+columns[j]);
-                }
+                }*/
 
             }
             contentValuesVector.add(movieValues);
         }
-        int in = 0;
+        int in;
         if (contentValuesVector.size() > 0) {
             ContentValues[] cvArray = new ContentValues[contentValuesVector.size()];
             contentValuesVector.toArray(cvArray);
@@ -205,7 +205,7 @@ public class PopularMoviesSyncAdapter extends AbstractThreadedSyncAdapter {
             contentValuesVector.add(movieValues);
 
         }
-        int in = 0;
+        int in;
         if (contentValuesVector.size() > 0) {
             ContentValues[] cvArray = new ContentValues[contentValuesVector.size()];
             contentValuesVector.toArray(cvArray);
@@ -219,7 +219,7 @@ public class PopularMoviesSyncAdapter extends AbstractThreadedSyncAdapter {
         HttpURLConnection urlConnection = null;
         BufferedReader reader = null;
 
-        String jSonStr = null;
+        String jSonStr;
 
         try {
             ////Log.v(LOG_TAG, url.toString());
@@ -249,7 +249,6 @@ public class PopularMoviesSyncAdapter extends AbstractThreadedSyncAdapter {
 
         }catch (Exception e){
             Log.e(LOG_TAG, e.toString());
-            jSonStr = null;
 
         }finally {
             if (urlConnection != null){

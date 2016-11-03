@@ -47,7 +47,7 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
     static final int COL_RELEASE_DATE = 3;
     static final int COL_POSTER_PATH = 4;
     static final int COL_OVERVIEW = 5;
-    static final int COL_VOTE_AVARAGE = 6;
+    static final int COL_VOTE_AVERAGE = 6;
     static final int COL_BACKDROP_PATH = 7;
     static final int COL_MOVIE_LIST = 8;
     static final int COL_POSITION = 9;
@@ -102,8 +102,6 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
                     ((Callback) getActivity())
                             .onItemSelected(MovieContract.MovieEntry.buildMovieWithTrailersAndReviewsUri(cursor.getLong(COL_MOVIE_ID)));
                 }
-
-
             }
         });
 
@@ -157,21 +155,18 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-       /* Log.v(LOG_TAG, "onLoadFinished: data "+data.moveToFirst()+" - "
-                + data.getColumnCount()+" - " + data.getCount());*/
 
         mMovieAdapter.swapCursor(data);
-
-        if (getActivity().findViewById(R.id.detail_container) != null) {
+        if (getActivity().findViewById(R.id.detail_container) != null && data.moveToFirst()) {
             final int WHAT = 1;
             final Cursor c = data;
-            Handler handler = new Handler() {
+            final Handler handler = new Handler() {
                 @Override
                 public void handleMessage (Message msg){
                     c.moveToFirst();
                     Bundle args = new Bundle();
                     args.putParcelable(DetailFragment.DETAIL_URI,
-                            MovieContract.MovieEntry.buildMovieUri(c.getLong(COL_MOVIE_ID)));
+                            MovieContract.MovieEntry.buildMovieWithTrailersAndReviewsUri(c.getLong(COL_MOVIE_ID)));
                     DetailFragment detailFragment = new DetailFragment();
                     detailFragment.setArguments(args);
                     FragmentTransaction ft = getActivity()
@@ -191,9 +186,7 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
     }
 
     public interface Callback {
-        /**
-         * DetailFragmentCallback for when an item has been selected.
-         */
-        public void onItemSelected(Uri movieUri);
+
+        void onItemSelected(Uri movieUri);
     }
 }
