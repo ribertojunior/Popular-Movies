@@ -12,43 +12,39 @@
         >
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="144dp"
+            android:layout_height="wrap_content"
             android:background="@color/colorPrimary"
             android:orientation="vertical"
-            android:paddingLeft="32dp"
-            android:paddingStart="32dp"
-            android:paddingEnd="32dp"
+            android:paddingLeft="@dimen/title_padding"
+            android:paddingStart="@dimen/title_padding"
+            android:paddingEnd="@dimen/title_padding"
             android:paddingTop="?attr/actionBarSize">
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/movieTitleText"
-                    android:textSize="34sp"
-                    android:textColor="@color/colorTextLight"
-                    />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/dateText"
-                    android:textSize="18sp"
-                    android:paddingStart="8dp"
-                    android:paddingLeft="8dp"
-                    android:paddingRight="8dp"
-                    android:textColor="@color/colorTextLight"
 
-                    />
-            </LinearLayout>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/movieTitleText"
+                android:textSize="@dimen/title_text"
+                android:textColor="@color/colorTextLight"
+                tools:text="The Godfather: Part II"
+                />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/dateText"
+                android:textSize="@dimen/heading"
+                android:textColor="@color/colorTextLight"
+                tools:text="(2010)"
+                />
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/voteAvgText"
-                android:textSize="16sp"
+                android:textSize="@dimen/body_text"
                 android:textColor="@color/colorTextLight"
+                tools:text="11/10"
                 />
 
 
@@ -63,7 +59,8 @@
                 android:id="@+id/imageView"
                 android:layout_alignParentTop="true"
                 android:layout_alignParentLeft="true"
-                android:layout_alignParentStart="true" />
+                android:layout_alignParentStart="true"
+                />
 
             <ImageView
                 android:layout_width="wrap_content"
@@ -75,7 +72,7 @@
                 android:src="@android:drawable/btn_star_big_off" />
             <!--btn_star_big_on -->
             <View
-                android:layout_height="2dip"
+                android:layout_height="@dimen/divider"
                 android:background="@color/colorPrimaryDark"
                 android:layout_width="wrap_content"
                 android:layout_alignTop="@+id/overviewText"
@@ -87,17 +84,18 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/overviewText"
-                android:textSize="20sp"
+                android:textSize="@dimen/body_text"
                 android:textColor="@color/colorText"
                 android:layout_below="@+id/imageView"
                 android:layout_alignRight="@+id/imageView"
                 android:layout_alignEnd="@+id/imageViewStar"
-                android:paddingTop="8dp"
-                android:paddingBottom="8dp"
-                android:padding="8dp" />
+                android:paddingTop="@dimen/small_padding"
+                android:paddingBottom="@dimen/small_padding"
+                android:padding="@dimen/small_padding"
+                tools:text="The compelling sequel to The Godfather, contrasting the life of Corleone father and son. Traces the problems of Michael Corleone (Al Pacino) in 1958 and that of a young immigrant Vito Corleone (Robert De Niro) in 1917's Hell's Kitchen. Michael survives many misfortunes and Vito is introduced to a life of crime."/>
 
             <View
-                android:layout_height="2dip"
+                android:layout_height="@dimen/divider"
                 android:background="@color/colorPrimaryDark"
                 android:layout_width="wrap_content"
                 android:layout_below="@+id/overviewText"
@@ -108,16 +106,14 @@
                 android:layout_height="wrap_content"
                 android:id="@+id/trailerText"
                 android:text="@string/trailers_text_view"
-                android:textSize="24sp"
+                android:textSize="@dimen/heading"
                 android:textColor="@color/colorText"
                 android:layout_below="@+id/overviewText"
-                android:padding="8dp" />
+                android:padding="@dimen/small_padding" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-
-
                 android:layout_alignRight="@+id/imageView"
                 android:id="@+id/viewTrailer"
                 android:layout_below="@+id/trailerText"
@@ -130,10 +126,10 @@
                 android:layout_height="wrap_content"
                 android:id="@+id/reviewsText"
                 android:text="@string/reviews_text_view"
-                android:textSize="24sp"
+                android:textSize="@dimen/heading"
                 android:textColor="@color/colorText"
                 android:layout_below="@+id/viewTrailer"
-                android:padding="8dp" />
+                android:padding="@dimen/small_padding" />
 
             <LinearLayout
                 android:layout_width="match_parent"

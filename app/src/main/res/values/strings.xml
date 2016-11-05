@@ -54,5 +54,6 @@
     <string name="format_vote">
         <xliff:g id="vote">%1$s</xliff:g>/10
     </string>
+    <string name="intent_error">You don\'t have an app installed to perform this action.</string>
 
 </resources>

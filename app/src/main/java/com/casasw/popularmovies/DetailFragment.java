@@ -1,5 +1,6 @@
 package com.casasw.popularmovies;
 
+import android.content.AsyncQueryHandler;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
@@ -11,7 +12,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -110,7 +110,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         if (data.moveToFirst()) {
-            ViewHolder viewHolder = new ViewHolder(getView());
+            final ViewHolder viewHolder = new ViewHolder(getView());
             viewHolder.mTitle.setText(data.getString(COL_ORIGINAL_TITLE));
             viewHolder.mOverview.setText(data.getString(COL_OVERVIEW));
 
@@ -129,36 +129,47 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             final String selection = MovieContract.FavoritesEntry.TABLE_NAME +"."+ MovieContract.FavoritesEntry.COLUMN_MOVIE_ID + " = ? ";
             final String[] args = new String[]{data.getString(COL_MOVIE_ID)};
             final ContentValues cvFav = getFavoriteContentValues(data);
-            Cursor c = getContext().getContentResolver().query(MovieContract.FavoritesEntry.CONTENT_URI, null, selection, args,null);
+            final AsyncQueryHandler handler = new AsyncQueryHandler(getContext().getContentResolver()) {
+                @Override
+                protected void onQueryComplete(int token, Object cookie, Cursor cursor) {
+                    if (cursor.moveToFirst())
+                        viewHolder.mStar.setImageResource(android.R.drawable.btn_star_big_on);
+                }
+
+                @Override
+                protected void onInsertComplete(int token, Object cookie, Uri uri) {
+                    viewHolder.mStar.setImageResource(android.R.drawable.btn_star_big_on);
+                    Snackbar.make(viewHolder.mStar, R.string.favorite_on,
+                            Snackbar.LENGTH_SHORT).show();
+
+                }
+
+                @Override
+                protected void onDeleteComplete(int token, Object cookie, int result) {
+                    viewHolder.mStar.setImageResource(android.R.drawable.btn_star_big_off);
+                    Snackbar.make(viewHolder.mStar, R.string.favorite_off,
+                            Snackbar.LENGTH_SHORT).show();
+                }
+            };
+            //Cursor c = getContext().getContentResolver().query(MovieContract.FavoritesEntry.CONTENT_URI, null, selection, args,null);
             viewHolder.mStar.setImageResource(android.R.drawable.btn_star_big_off);
-            if (c.moveToFirst())
-                viewHolder.mStar.setImageResource(android.R.drawable.btn_star_big_on);
+            handler.startQuery(0, null,MovieContract.FavoritesEntry.CONTENT_URI, null, selection, args,null);
 
             viewHolder.mStar.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    String msg;
+                    //String msg;
                     ImageView imageView = (ImageView) v;
 
                     if (imageView.getDrawable().getConstantState().equals(
                             getResources().getDrawable(android.R.drawable.btn_star_big_on).getConstantState())){
-                        imageView.setImageResource(android.R.drawable.btn_star_big_off);
-                        msg = getString(R.string.favorite_off);
-                        long del = getContext().getContentResolver().delete(MovieContract.FavoritesEntry.CONTENT_URI,
-                                selection, args);
-                        Log.v(LOG_TAG, "onClick: Del "+del);
+                        handler.startDelete(0, null,MovieContract.FavoritesEntry.CONTENT_URI,selection, args);
                     }else {
-                        imageView.setImageResource(android.R.drawable.btn_star_big_on);
-                        msg = getString(R.string.favorite_on);
-                        Uri uri = getContext().getContentResolver().insert(MovieContract.FavoritesEntry.CONTENT_URI, cvFav);
-                        Log.v(LOG_TAG, "onClick: Uri "+uri);
+                        handler.startInsert(0, null, MovieContract.FavoritesEntry.CONTENT_URI, cvFav);
                     }
-                    Snackbar.make(v, msg,
-                            Snackbar.LENGTH_SHORT)
-                            .show();
+
                 }
             });
-            c.close();
             View item;
             TextView textView;
             ImageView auxImage;
@@ -175,7 +186,11 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                             public void onClick(View v) {
                                 String[] path = {"watch"};
                                 Intent intent = new Intent(Intent.ACTION_VIEW, Utilities.uriMaker("www.youtube.com", path, "v",key));
-                                startActivity(intent);
+                                if (intent.resolveActivity(getActivity().getPackageManager()) != null) {
+                                    startActivity(intent);
+                                } else {
+                                    Snackbar.make(v,R.string.intent_error, Snackbar.LENGTH_SHORT).show();
+                                }
                             }
                         });
                         textView = (TextView) item.findViewById(R.id.textViewTrailer);
@@ -185,7 +200,6 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                 } else {
                     viewHolder.mTrailerText.setVisibility(View.INVISIBLE);
                 }
-
                 if (data.getColumnIndex(MovieContract.ReviewsEntry.COLUMN_AUTHOR) != -1) {
                     if (!unique.containsValue(data.getString(data.getColumnIndex(MovieContract.ReviewsEntry.COLUMN_URL)))) {
                         unique.put(data.getString(data.getColumnIndex(MovieContract.ReviewsEntry.COLUMN_URL)),data.getString(data.getColumnIndex(MovieContract.ReviewsEntry.COLUMN_URL)));
@@ -197,7 +211,11 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                             @Override
                             public void onClick(View v) {
                                 Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-                                startActivity(intent);
+                                if (intent.resolveActivity(getActivity().getPackageManager()) != null) {
+                                    startActivity(intent);
+                                } else {
+                                    Snackbar.make(v,R.string.intent_error, Snackbar.LENGTH_SHORT).show();
+                                }
                             }
                         });
                         textView = (TextView) item.findViewById(R.id.textViewTrailer);

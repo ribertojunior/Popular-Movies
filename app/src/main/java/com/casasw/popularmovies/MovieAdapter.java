@@ -12,8 +12,6 @@ import android.widget.ImageView;
 import com.squareup.picasso.Picasso;
 
 
-
-
 public class MovieAdapter extends CursorAdapter {
     public MovieAdapter(Context context, Cursor c, int flags) {
         super(context, c, flags);
@@ -25,20 +23,20 @@ public class MovieAdapter extends CursorAdapter {
     public View newView(Context context, Cursor cursor, ViewGroup parent) {
 
         View view = LayoutInflater.from(context).inflate(R.layout.grid_view_item, parent, false);
-        ImageView imageView = (ImageView) view.findViewById(R.id.image_view_grid);
-        imageView.setAdjustViewBounds(true);
-        imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+        ViewHolder viewHolder = new ViewHolder(view);
 
+        viewHolder.mImageView.setAdjustViewBounds(true);
+        viewHolder.mImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+        view.setTag(viewHolder);
         return view;
     }
 
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
-
-        ImageView imageView = (ImageView) view.findViewById(R.id.image_view_grid);
+        ViewHolder viewHolder = (ViewHolder) view.getTag();
         String poster_path = cursor.getString(MainFragment.COL_POSTER_PATH);
         Uri posterUri = Utilities.uriMaker(poster_path.substring(1));
-        Picasso.with(context).load(posterUri).into(imageView);
+        Picasso.with(context).load(posterUri).into(viewHolder.mImageView);
 
     }
 
@@ -52,6 +50,12 @@ public class MovieAdapter extends CursorAdapter {
         return super.getViewTypeCount();
     }
 
+    static class ViewHolder {
+        final ImageView mImageView;
 
+        ViewHolder (View view) {
+            mImageView = (ImageView) view.findViewById(R.id.image_view_grid);
+        }
+    }
 
 }
